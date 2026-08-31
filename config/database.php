@@ -63,6 +63,21 @@ return [
             ]) : [],
         ],
 
+        'legacy' => [
+            'driver' => 'mysql',
+            'host' => env('DB_LEGACY_HOST', '127.0.0.1'),
+            'port' => env('DB_LEGACY_PORT', '3307'),
+            'database' => env('DB_LEGACY_DATABASE', 'hrsys'),
+            'username' => env('DB_LEGACY_USERNAME', 'root'),
+            'password' => env('DB_LEGACY_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -148,7 +163,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

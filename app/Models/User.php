@@ -10,9 +10,11 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $connection = 'legacy'; // ← hrsys
     protected $table = 'users';
 
     protected $fillable = [
+        'empleado_id', 
         'name',
         'username',
         'email',
@@ -34,7 +36,7 @@ class User extends Authenticatable
 
     public function empleado()
     {
-        return $this->hasOne(Empleado::class, 'user_id');
+        return $this->belongsTo(Empleado::class, 'empleado_id');
     }
 
     public function empresas()
