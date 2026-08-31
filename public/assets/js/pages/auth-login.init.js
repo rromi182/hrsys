@@ -7,42 +7,44 @@ Contact: StarCode Kh@gmail.com
 File: auth login init Js File
 */
 
-document.getElementById('signInForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent the form from submitting
+document.addEventListener('DOMContentLoaded', function () {
+    const signInForm = document.getElementById('signInForm');
+    
+    // Solo ejecutar si estamos en la página de login
+    if (!signInForm) return;
 
-    // Get input values
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    // Define regular expressions for validation
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-
-    // Validate username/email and password
-    const usernameError = document.getElementById('username-error');
-    const passwordError = document.getElementById('password-error');
-    const successAlert = document.getElementById('successAlert');
-    const rememberMeCheckbox = document.getElementById('checkboxDefault1');
-    const rememberError = document.getElementById('remember-error');
-
-    usernameError.classList.add('hidden'); // Hide any previous error message
-    passwordError.classList.add('hidden');
-    successAlert.classList.add('hidden'); // Hide the success message
-
-    if (!emailRegex.test(username)) {
-        usernameError.classList.remove('hidden'); // Show error message
-    } else if (!strongPasswordRegex.test(password)) {
-        passwordError.classList.remove('hidden'); // Show error message
-    } else {
-        // Form is valid, show the success message
-        successAlert.classList.remove('hidden');
-    }
-
-    if (!rememberMeCheckbox.checked) {
-        // Prevent the form from submitting if the checkbox is not checked
+    signInForm.addEventListener('submit', function (event) {
         event.preventDefault();
-        rememberError.classList.remove('hidden');
-    } else {
-        rememberError.classList.add('hidden');
-    }
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        const strongPasswordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+        const usernameError = document.getElementById('username-error');
+        const passwordError = document.getElementById('password-error');
+        const successAlert = document.getElementById('successAlert');
+        const rememberMeCheckbox = document.getElementById('checkboxDefault1');
+        const rememberError = document.getElementById('remember-error');
+
+        usernameError.classList.add('hidden');
+        passwordError.classList.add('hidden');
+        successAlert.classList.add('hidden');
+
+        if (!emailRegex.test(username)) {
+            usernameError.classList.remove('hidden');
+        } else if (!strongPasswordRegex.test(password)) {
+            passwordError.classList.remove('hidden');
+        } else {
+            successAlert.classList.remove('hidden');
+        }
+
+        if (!rememberMeCheckbox.checked) {
+            event.preventDefault();
+            rememberError.classList.remove('hidden');
+        } else {
+            rememberError.classList.add('hidden');
+        }
+    });
 });

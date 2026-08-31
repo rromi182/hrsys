@@ -2,7 +2,7 @@
 <html lang="en" class="light scroll-smooth group" data-layout="vertical" data-sidebar="light" data-sidebar-size="lg" data-mode="light" data-topbar="light" data-skin="default" data-navbar="sticky" data-content="fluid" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <title>Sign In | StarCode & Dashboard Template</title>
+    <title>Iniciar Sesión</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta content="Minimal Admin & Dashboard Template" name="description">
     <meta content="StarCode Kh" name="author">
@@ -66,7 +66,6 @@
     <script src="{{ URL::to('assets/libs/prismjs/prism.js') }}"></script>
     <script src="{{ URL::to('assets/libs/lucide/umd/lucide.js') }}"></script>
     <script src="{{ URL::to('assets/js/starcode.bundle.js') }}"></script>
-    <script src="{{ URL::to('assets/js/pages/auth-login.init.js') }}"></script>
     @yield('script')
 </body>
 </html>

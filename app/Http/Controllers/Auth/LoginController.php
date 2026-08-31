@@ -59,10 +59,10 @@ class LoginController extends Controller
                 // Update last login
                 $user->update(['last_login' => $todayDate]);
 
-                flash()->success('Login successful :)');
+                flash()->success('Login exitoso :)');
                 return redirect()->intended('home');
             } else {
-                flash()->error('Error: Wrong username or password :)');
+                flash()->error('Error: Usuario o contraseña incorrectos :)');
                 return redirect('login');
             }
         } catch (\Exception $e) {

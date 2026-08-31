@@ -1,14 +1,14 @@
 /*
 Template Name: StarCode & Dashboard Template
-Author: StarCode Kh
-Version: 1.1.0
-Website: https://StarCode Kh.in/
-Contact: StarCode Kh@gmail.com
 File: auth Register init Js File
 */
 
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("registerForm");
+    
+    // Si no estamos en la página de register, salir sin error
+    if (!form) return;
+
     const emailField = document.getElementById("email-field");
     const usernameField = document.getElementById("username-field");
     const passwordField = document.getElementById("password");
@@ -20,36 +20,41 @@ document.addEventListener("DOMContentLoaded", function () {
     form.addEventListener("submit", function (event) {
         let valid = true;
 
-        // Reset previous error messages and styles
-        emailField.classList.remove("error");
-        usernameField.classList.remove("error");
-        passwordField.classList.remove("error");
-        emailError.classList.add("hidden");
-        usernameError.classList.add("hidden");
-        passwordError.classList.add("hidden");
+        // Reset errors (solo si el elemento existe)
+        if (emailField) emailField.classList.remove("error");
+        if (usernameField) usernameField.classList.remove("error");
+        if (passwordField) passwordField.classList.remove("error");
+        if (emailError) emailError.classList.add("hidden");
+        if (usernameError) usernameError.classList.add("hidden");
+        if (passwordError) passwordError.classList.add("hidden");
+        if (passwordSuggestion) passwordSuggestion.classList.add("hidden");
 
-        if (!validateEmail(emailField.value)) {
+        // Validar email
+        if (emailField && !validateEmail(emailField.value)) {
             emailField.classList.add("error");
-            emailError.classList.remove("hidden");
+            if (emailError) emailError.classList.remove("hidden");
             valid = false;
         }
 
-        if (!usernameField.value.trim()) {
+        // Validar username/name
+        if (usernameField && !usernameField.value.trim()) {
             usernameField.classList.add("error");
-            usernameError.classList.remove("hidden");
+            if (usernameError) usernameError.classList.remove("hidden");
             valid = false;
         }
 
-        if (passwordField.value.length < 8 || !containsLettersAndNumbers(passwordField.value)) {
+        // Validar password
+        if (passwordField && (passwordField.value.length < 8 || !containsLettersAndNumbers(passwordField.value))) {
             passwordField.classList.add("error");
-            passwordError.classList.remove("hidden");
-            passwordSuggestion.classList.remove("hidden");
+            if (passwordError) passwordError.classList.remove("hidden");
+            if (passwordSuggestion) passwordSuggestion.classList.remove("hidden");
             valid = false;
         }
 
         if (!valid) {
             event.preventDefault();
         }
+        // Si es válido, el formulario se envía normalmente al servidor
     });
 
     function validateEmail(email) {

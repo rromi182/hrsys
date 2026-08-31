@@ -5,28 +5,28 @@
         <div class="container-fluid group-data-[content=boxed]:max-w-boxed mx-auto">
             <div class="flex flex-col gap-2 py-4 md:flex-row md:items-center print:hidden">
                 <div class="grow">
-                    <h5 class="text-16">Employee List</h5>
+                    <h5 class="text-16">Lista de Empleados</h5>
                 </div>
                 <ul class="flex items-center gap-2 text-sm font-normal shrink-0">
                     <li class="relative before:content-['\ea54'] before:font-remix ltr:before:-right-1 rtl:before:-left-1  before:absolute before:text-[18px] before:-top-[3px] ltr:pr-4 rtl:pl-4 before:text-slate-400 dark:text-zink-200">
-                        <a href="#!" class="text-slate-400 dark:text-zink-200">HR Management</a>
+                        <a href="#" class="text-slate-400 dark:text-zink-200">Gestión de RRHH</a>
                     </li>
                     <li class="text-slate-700 dark:text-zink-100">
-                        Employee List
+                        Lista de Empleados
                     </li>
                 </ul>
             </div>
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center">
-                        <h6 class="text-15 grow">Employee List</h6>
+                        <h6 class="text-15 grow">Lista de Empleados</h6>
                         <div class="shrink-0">
                             <button data-modal-target="addEmployeeModal" type="button" class="text-white btn bg-custom-500 border-custom-500 hover:text-white hover:bg-custom-600 hover:border-custom-600 focus:text-white focus:bg-custom-600 focus:border-custom-600 focus:ring focus:ring-custom-100 active:text-white active:bg-custom-600 active:border-custom-600 active:ring active:ring-custom-100 dark:ring-custom-400/20">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus inline-block size-4">
                                     <path d="M5 12h14"></path>
                                     <path d="M12 5v14"></path>
                                 </svg> 
-                                <span class="align-middle">Add Employee</span>
+                                <span class="align-middle">Agregar Empleado</span>
                             </button>
                         </div>
                     </div>
@@ -36,16 +36,16 @@
                             <tr>
                                 <th>No</th>
                                 <th hidden>ID</th>
-                                <th>Employee ID</th>
-                                <th hidden>Photo</th>
+                                <th hidden>Empleado ID</th>
+                                <th hidden>Foto</th>
                                 <th hidden>Location</th>
                                 <th hidden>Join Date</th>
                                 <th hidden>Status</th>
                                 <th class="ltr:!text-left rtl:!text-right">Name</th>
                                 <th>Email</th>
-                                <th>Phone</th>
-                                <th>Experience</th>
-                                <th>Join Date</th>
+                                <th>Tél.</th>
+                                <th>Experiencia</th>
+                                <th hidden>Join Date</th>
                                 <th>Last Login</th>
                                 <th>Role</th>
                                 <th>Designation</th>
@@ -67,7 +67,7 @@
                                 <tr class="px-3.5 py-2.5 first:pl-5 last:pr-5 border-y border-slate-200 dark:border-zink-500">
                                     <td>{{ ++$key }}</td>
                                     <td hidden class="id">{{ $employee->id }}</td>
-                                    <td class="px-3.5 py-2.5 first:pl-5 last:pr-5"><a href="{{ url('page/account/'.$employee->user_id) }}" class="transition-all duration-150 ease-linear text-custom-500 hover:text-custom-600 user-id user_id">{{ $employee->user_id }}</a></td>
+                                    <td hidden class="px-3.5 py-2.5 first:pl-5 last:pr-5"><a href="{{ url('page/account/'.$employee->user_id) }}" class="transition-all duration-150 ease-linear text-custom-500 hover:text-custom-600 user-id user_id">{{ $employee->user_id }}</a></td>
                                     <td hidden class="photo">{{ $employee->avatar }}</td>
                                     <td hidden class="location">{{ $employee->location }}</td>
                                     <td hidden class="join_date">{{ $employee->join_date }}</td>
@@ -92,7 +92,7 @@
                                     <td class="email">{{ $employee->email }}</td>
                                     <td class="phone_number">{{ $employee->phone_number }}</td>
                                     <td class="experience">{{ $employee->experience }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($employee->join_date)->diffForHumans(); }}</td>
+                                    <td hidden>{{ \Carbon\Carbon::parse($employee->join_date)->diffForHumans(); }}</td>
                                     <td>{{ \Carbon\Carbon::parse($employee->last_login)->diffForHumans(); }}</td>
                                     <td class="role_name">{{ $employee->role_name }}</td>
                                     <td class="designation">{{ $employee->designation }}</td>
@@ -134,9 +134,9 @@
 
     <!--add Employee-->
     <div id="addEmployeeModal" modal-center="" class="fixed flex flex-col hidden transition-all duration-300 ease-in-out left-2/4 z-drawer -translate-x-2/4 -translate-y-2/4 show">
-        <div class="w-screen md:w-[30rem] bg-white shadow rounded-md dark:bg-zink-600">
+        <div class="w-screen md:w-[40rem] bg-white shadow rounded-md dark:bg-zink-600">
             <div class="flex items-center justify-between p-4 border-b dark:border-zink-500">
-                <h5 class="text-16">Add Employee</h5>
+                <h5 class="text-16">Agregar Empleado</h5>
                 <button data-modal-close="addEmployeeModal" class="transition-all duration-200 ease-linear text-slate-400 hover:text-red-500">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -301,9 +301,9 @@
 
     <!--edit Employee-->
     <div id="editEmployeeModal" modal-center="" class="fixed flex flex-col hidden transition-all duration-300 ease-in-out left-2/4 z-drawer -translate-x-2/4 -translate-y-2/4 show ">
-        <div class="w-screen md:w-[30rem] bg-white shadow rounded-md dark:bg-zink-600">
+        <div class="w-screen md:w-[40rem] bg-white shadow rounded-md dark:bg-zink-600">
             <div class="flex items-center justify-between p-4 border-b dark:border-zink-500">
-                <h5 class="text-16">Edit Employee</h5>
+                <h5 class="text-16">Editar Empleado</h5>
                 <button data-modal-close="editEmployeeModal" class="transition-all duration-200 ease-linear text-slate-400 hover:text-red-500">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
