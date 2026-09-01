@@ -554,6 +554,13 @@
 
     <!-- App js -->
     <script src="{{ URL::to('assets/js/app.js') }}"></script>
+    <script>
+    window.routes = {
+        nominaData: "{{ route('nomina.movimientos.data') }}",
+        nominaStore: "{{ route('nomina.movimientos.store') }}",
+        nominaAnular: "{{ route('nomina.movimientos.anular', ':id') }}",
+    };
+</script>
     @yield('script')
 </body>
 </html>

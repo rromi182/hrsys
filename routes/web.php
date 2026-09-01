@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HRController;
 use App\Http\Controllers\EmpleadoController;
+use App\Http\Controllers\NominaController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -102,5 +103,17 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('/empleados/{empleado}/ver', [EmpleadoController::class, 'show'])->name('empleados.show');
         Route::put('/empleados/{empleado}/actualizar', [EmpleadoController::class, 'update'])->name('empleados.update');
         Route::delete('/empleados/{empleado}/eliminar', [EmpleadoController::class, 'destroy'])->name('empleados.destroy');
+    });
+
+    // -------------------------- nomina salarial ----------------------//
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/nomina', [NominaController::class, 'movimientos'])->name('nomina.movimientos');
+        Route::get('/nomina/data', [NominaController::class, 'movimientosData'])->name('nomina.movimientos.data');
+        Route::post('/nomina/store', [NominaController::class, 'storeMovimiento'])->name('nomina.movimientos.store');
+        Route::post('/nomina/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('nomina.movimientos.anular');
+        Route::get('/nomina/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('nomina.empleado.salario');
+        Route::get('/nomina/resumen', [NominaController::class, 'resumen'])->name('nomina.resumen');
+        Route::get('/nomina/resumen/excel', [NominaController::class, 'exportarExcel'])->name('nomina.resumen.excel');
+        Route::get('/nomina/resumen/csv', [NominaController::class, 'exportarCsv'])->name('nomina.resumen.csv');
     });
 });
