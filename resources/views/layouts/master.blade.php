@@ -561,6 +561,6 @@
         nominaAnular: "{{ route('nomina.movimientos.anular', ':id') }}",
     };
 </script>
-    @yield('script')
+    @yield('scripts')
 </body>
 </html>

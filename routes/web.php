@@ -109,7 +109,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/nomina', [NominaController::class, 'movimientos'])->name('nomina.movimientos');
         Route::get('/nomina/data', [NominaController::class, 'movimientosData'])->name('nomina.movimientos.data');
-        Route::post('/nomina/store', [NominaController::class, 'storeMovimiento'])->name('nomina.movimientos.store');
+        Route::post('/nomina/store', [NominaController::class, 'store'])->name('nomina.movimientos.store');
         Route::post('/nomina/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('nomina.movimientos.anular');
         Route::get('/nomina/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('nomina.empleado.salario');
         Route::get('/nomina/resumen', [NominaController::class, 'resumen'])->name('nomina.resumen');

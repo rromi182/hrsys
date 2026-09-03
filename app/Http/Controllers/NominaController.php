@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/NominaController.php
 
 namespace App\Http\Controllers;
 
@@ -52,11 +53,11 @@ class NominaController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereHas('empleado', function ($sq) use ($search) {
                     $sq->where('nombres', 'like', "%{$search}%")
-                      ->orWhere('apellidos', 'like', "%{$search}%")
-                      ->orWhere('numero_documento', 'like', "%{$search}%");
+                        ->orWhere('apellidos', 'like', "%{$search}%")
+                        ->orWhere('numero_documento', 'like', "%{$search}%");
                 })
-                ->orWhere('tipo_movimiento', 'like', "%{$search}%")
-                ->orWhere('observacion', 'like', "%{$search}%");
+                    ->orWhere('tipo_movimiento', 'like', "%{$search}%")
+                    ->orWhere('observacion', 'like', "%{$search}%");
             });
         }
 
@@ -108,80 +109,57 @@ class NominaController extends Controller
     /**
      * Guardar nuevo movimiento de nómina
      */
-    public function storeMovimiento(Request $request)
+    public function store(Request $request)
     {
-        $rules = [
-            'empleado_id'     => 'required|integer|exists:empleados,id',
-            'fecha'           => 'required|date',
-            'tipo_movimiento' => 'required|in:sueldo,extra,vale,ausencia,llegada_tardia,otros',
-            'monto'           => 'required|integer|min:0',
-            'observacion'     => 'nullable|string|max:500',
-        ];
-
-        // Observación obligatoria solo para "otros"
-        if ($request->tipo_movimiento === 'otros') {
-            $rules['observacion'] = 'required|string|max:500';
-        }
-
-        $validator = Validator::make($request->all(), $rules, [
-            'empleado_id.required'     => 'Debe seleccionar un empleado.',
-            'fecha.required'           => 'La fecha es obligatoria.',
-            'tipo_movimiento.required' => 'El tipo de movimiento es obligatorio.',
-            'monto.required'           => 'El monto es obligatorio.',
-            'monto.integer'            => 'El monto debe ser un número entero.',
-            'monto.min'                => 'El monto no puede ser negativo.',
-            'observacion.required'     => 'La observación es obligatoria para movimientos tipo "Otros".',
+        $request->validate([
+            'empleado_id' => 'required|exists:empleados,id',
+            'tipo_movimiento' => 'required|in:sueldo,extra,vale,ausencia,llegada_tardia,otros', // Cambiado de 'tipo' a 'tipo_movimiento'
+            'monto' => 'required|numeric|min:0',
+            'fecha' => 'required|date',
+            'observacion' => 'nullable|string|max:500',
+            // 'anio' y 'mes' los calcularemos automáticamente
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors(),
-            ], 422);
-        }
+        // Limpiar separadores de miles
+        $montoRaw = str_replace(['.', ','], '', $request->monto);
+        $monto = (int) $montoRaw;
 
+        // Obtener año y mes de la fecha
         $fecha = \Carbon\Carbon::parse($request->fecha);
-        $empleado = Empleado::findOrFail($request->empleado_id);
+        $anio = $fecha->year;
+        $mes = $fecha->month;
 
-        // Determinar naturaleza automáticamente
+        // Determinar naturaleza según el tipo de movimiento
         $esIngreso = MovimientoNomina::determinarNaturaleza($request->tipo_movimiento);
 
-        // Verificar duplicado de sueldo para el mismo empleado/mes
-        if ($request->tipo_movimiento === 'sueldo') {
-            $existeSueldo = MovimientoNomina::where('empleado_id', $request->empleado_id)
-                ->where('tipo_movimiento', 'sueldo')
-                ->where('anio', $fecha->year)
-                ->where('mes', $fecha->month)
-                ->where('estado', 'activo')
-                ->exists();
+        try {
+            $movimiento = MovimientoNomina::create([
+                'empleado_id' => $request->empleado_id,
+                'empresa_id' => $request->empresa_id ?? 1,
+                'fecha' => $fecha->toDateString(),
+                'tipo_movimiento' => $request->tipo_movimiento,
+                'monto' => $monto,
+                'anio' => $anio,
+                'mes' => $mes,
+                'es_ingreso' => $esIngreso,
+                'observacion' => $request->observacion,
+                'estado' => 'activo',
+                'creado_por' => auth()->id(),
+            ]);
 
-            if ($existeSueldo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este empleado ya tiene registrado un sueldo para el mes ' . $fecha->format('m/Y') . '.',
-                ], 422);
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Movimiento registrado correctamente.',
+                'data' => $movimiento,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar movimiento de nómina: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno al guardar el movimiento.',
+            ], 500);
         }
-
-        $movimiento = MovimientoNomina::create([
-            'empleado_id'     => $request->empleado_id,
-            'empresa_id'      => $empleado->empresa_id,
-            'fecha'           => $fecha->format('Y-m-d'),
-            'tipo_movimiento' => $request->tipo_movimiento,
-            'monto'           => $request->monto,
-            'observacion'     => $request->observacion,
-            'anio'            => $fecha->year,
-            'mes'             => $fecha->month,
-            'es_ingreso'      => $esIngreso ? 1 : 0,
-            'estado'          => 'activo',
-            'creado_por'      => Auth::id(),
-        ]);
-
-        return response()->json([
-            'success'   => true,
-            'message'   => 'Movimiento registrado correctamente.',
-            'movimiento'=> $movimiento,
-        ]);
     }
 
     /**
@@ -200,7 +178,7 @@ class NominaController extends Controller
 
         $movimiento->update([
             'estado'         => 'anulado',
-            'actualizado_por'=> Auth::id(),
+            'actualizado_por' => Auth::id(),
         ]);
 
         return response()->json([
@@ -268,7 +246,7 @@ class NominaController extends Controller
                 'extra'         => $extra,
                 'vale'          => $vale,
                 'ausencia'      => $ausencia,
-                'llegada_tardia'=> $llegadaTardia,
+                'llegada_tardia' => $llegadaTardia,
                 'otros'         => $otros,
                 'total_neto'    => $totalNeto,
             ];
@@ -277,7 +255,11 @@ class NominaController extends Controller
         }
 
         return view('HR.nomina.resumen', compact(
-            'anio', 'mes', 'empresaId', 'resumen', 'totalNetoGeneral'
+            'anio',
+            'mes',
+            'empresaId',
+            'resumen',
+            'totalNetoGeneral'
         ));
     }
 

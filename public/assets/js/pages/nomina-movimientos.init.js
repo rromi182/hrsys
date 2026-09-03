@@ -16,7 +16,7 @@ $(document).ready(function () {
             type: 'GET',
             data: function (d) {
                 d.anio = $('#filtroAnio').val();
-                d.mes  = $('#filtroMes').val();
+                d.mes = $('#filtroMes').val();
                 d.empleado_id = $('#filtroEmpleado').val();
                 d.tipo = $('#filtroTipo').val();
             },
@@ -29,7 +29,7 @@ $(document).ready(function () {
             {
                 data: 'tipo_label',
                 className: 'text-center',
-                render: function (data, type, row) {
+                render: function (data) {
                     const badges = {
                         'Sueldo': '<span class="badge bg-primary-subtle text-primary">Sueldo</span>',
                         'Extra': '<span class="badge bg-info-subtle text-info">Extra</span>',
@@ -74,7 +74,7 @@ $(document).ready(function () {
                 previous: '<i class="ri-arrow-left-s-line"></i>',
                 next: '<i class="ri-arrow-right-s-line"></i>'
             },
-            info: 'Showing _START_ to _END_ of _TOTAL_ Results',
+            info: 'Mostrando _START_ a _END_ de _TOTAL_ resultados',
         },
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
@@ -105,9 +105,8 @@ $(document).ready(function () {
     const $inputObservacion = $('#inputObservacion');
     const $feedbackObs = $('#feedbackObservacion');
 
-    // Montos fijos por tipo
     const MONTOS_FIJOS = {
-        'sueldo': null,  // Se toma del salario_base del empleado
+        'sueldo': null,
         'extra': 500000,
         'vale': 0,
         'ausencia': 0,
@@ -132,16 +131,14 @@ $(document).ready(function () {
                 $inputMonto.val(0).prop('readonly', false);
             }
         } else if (MONTOS_FIJOS[tipo] !== undefined) {
-            $inputMonto.val(MONTOS_FIJOS[tipo]);
             if (MONTOS_FIJOS[tipo] === 0) {
-                $inputMonto.prop('readonly', false);
+                $inputMonto.val(0).prop('readonly', false);
             } else {
-                $inputMonto.prop('readonly', true);
+                $inputMonto.val(MONTOS_FIJOS[tipo]).prop('readonly', true);
             }
         }
     }
 
-    // Actualizar monto al cambiar empleado o tipo
     $selectEmpleado.on('change', actualizarMonto);
     $selectTipo.on('change', function () {
         actualizarMonto();
@@ -149,7 +146,7 @@ $(document).ready(function () {
     });
 
     // --------------------------------------------------------
-    // 4. VALIDACIÓN DE OBSERVACIÓN (Obligatoria solo para "otros")
+    // 4. VALIDACIÓN DE OBSERVACIÓN
     // --------------------------------------------------------
     function validarObservacion() {
         const tipo = $selectTipo.val();
@@ -178,19 +175,41 @@ $(document).ready(function () {
     });
 
     // --------------------------------------------------------
-    // 5. GUARDAR MOVIMIENTO (AJAX)
+    // 5. GUARDAR MOVIMIENTO
     // --------------------------------------------------------
     $('#formNuevoMovimiento').on('submit', function (e) {
         e.preventDefault();
 
+        // Asegurar que el monto tenga un valor
         const tipo = $selectTipo.val();
         const observacion = $inputObservacion.val().trim();
+        let montoVal = $inputMonto.val();
 
-        // Validación manual de observación para "otros"
+        // Si el monto está vacío o es 0 y es sueldo, intentar obtener el salario
+        if ((!montoVal || montoVal === '0') && tipo === 'sueldo') {
+            const empleadoOption = $selectEmpleado.find('option:selected');
+            const salario = empleadoOption.data('salario');
+            if (salario && salario > 0) {
+                $inputMonto.val(salario);
+                montoVal = salario;
+            }
+        }
+
+        // Validación de observación para "otros"
         if (tipo === 'otros' && observacion === '') {
             $inputObservacion.addClass('is-invalid').focus();
             $feedbackObs.show();
             return;
+        }
+
+        // Validación de empleado
+        if (!$selectEmpleado.val()) {
+            $('#errorEmpleado').removeClass('hidden');
+            $selectEmpleado.addClass('border-red-500');
+            return;
+        } else {
+            $('#errorEmpleado').addClass('hidden');
+            $selectEmpleado.removeClass('border-red-500');
         }
 
         const $btn = $('#btnGuardarMovimiento');
@@ -199,10 +218,22 @@ $(document).ready(function () {
         $btn.prop('disabled', true);
         $spinner.removeClass('d-none');
 
+        // Crear FormData
+        const formData = new FormData(this);
+        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+        
+        // Asegurar que el monto se envía correctamente
+        formData.set('monto', montoVal || 0);
+
+        // Agregar campos adicionales que el backend espera
+        formData.append('empresa_id', 1); // O el ID de la empresa del usuario
+
         $.ajax({
             url: window.routes.nominaStore,
             method: 'POST',
-            data: $(this).serialize(),
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (response) {
                 if (response.success) {
                     Swal.fire({
@@ -216,7 +247,14 @@ $(document).ready(function () {
                     $('#formNuevoMovimiento')[0].reset();
                     $inputMonto.val(0).prop('readonly', false);
                     $inputObservacion.removeClass('is-invalid');
+                    $feedbackObs.hide();
                     tabla.ajax.reload();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message || 'Error al guardar',
+                    });
                 }
             },
             error: function (xhr) {
@@ -248,6 +286,8 @@ $(document).ready(function () {
         $inputMonto.val(0).prop('readonly', false);
         $inputObservacion.removeClass('is-invalid');
         $feedbackObs.hide();
+        $('#errorEmpleado').addClass('hidden');
+        $selectEmpleado.removeClass('border-red-500');
     });
 
     // --------------------------------------------------------
@@ -255,7 +295,6 @@ $(document).ready(function () {
     // --------------------------------------------------------
     $('#tablaMovimientos tbody').on('click', '.btn-anular', function () {
         const id = $(this).data('id');
-        const row = $(this).closest('tr');
 
         Swal.fire({
             title: '¿Anular movimiento?',
@@ -270,7 +309,10 @@ $(document).ready(function () {
                 $.ajax({
                     url: window.routes.nominaAnular.replace(':id', id),
                     method: 'POST',
-                    data: { _token: $('meta[name="csrf-token"]').attr('content') },
+                    data: { 
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        _method: 'POST'
+                    },
                     success: function (response) {
                         if (response.success) {
                             Swal.fire({
