@@ -69,12 +69,21 @@ $(document).ready(function () {
             },
         ],
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+            processing: "Procesando...",
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            loadingRecords: "Cargando...",
+            zeroRecords: "No se encontraron registros",
+            emptyTable: "No hay datos disponibles",
             paginate: {
+                first: "Primero",
                 previous: '<i class="ri-arrow-left-s-line"></i>',
-                next: '<i class="ri-arrow-right-s-line"></i>'
-            },
-            info: 'Mostrando _START_ a _END_ de _TOTAL_ resultados',
+                next: '<i class="ri-arrow-right-s-line"></i>',
+                last: "Último"
+            }
         },
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
@@ -104,6 +113,7 @@ $(document).ready(function () {
     const $inputMonto = $('#inputMonto');
     const $inputObservacion = $('#inputObservacion');
     const $feedbackObs = $('#feedbackObservacion');
+    const $errorEmpleado = $('#errorEmpleado');
 
     const MONTOS_FIJOS = {
         'sueldo': null,
@@ -153,11 +163,11 @@ $(document).ready(function () {
         if (tipo === 'otros') {
             $inputObservacion.prop('required', true)
                 .attr('placeholder', 'Ingrese la observación (obligatorio)');
-            $inputObservacion.closest('.mb-3').find('label').addClass('text-danger');
+            $('#labelObservacion').addClass('text-danger');
         } else {
             $inputObservacion.prop('required', false)
                 .attr('placeholder', 'Requerido solo para OTROS');
-            $inputObservacion.closest('.mb-3').find('label').removeClass('text-danger');
+            $('#labelObservacion').removeClass('text-danger');
             $inputObservacion.removeClass('is-invalid');
             $feedbackObs.hide();
         }
@@ -175,165 +185,192 @@ $(document).ready(function () {
     });
 
     // --------------------------------------------------------
-    // 5. GUARDAR MOVIMIENTO
+    // 5. FUNCIÓN PARA CERRAR MODAL
     // --------------------------------------------------------
-    $('#formNuevoMovimiento').on('submit', function (e) {
-        e.preventDefault();
-
-        // Asegurar que el monto tenga un valor
-        const tipo = $selectTipo.val();
-        const observacion = $inputObservacion.val().trim();
-        let montoVal = $inputMonto.val();
-
-        // Si el monto está vacío o es 0 y es sueldo, intentar obtener el salario
-        if ((!montoVal || montoVal === '0') && tipo === 'sueldo') {
-            const empleadoOption = $selectEmpleado.find('option:selected');
-            const salario = empleadoOption.data('salario');
-            if (salario && salario > 0) {
-                $inputMonto.val(salario);
-                montoVal = salario;
+    function cerrarModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('show', 'flex', 'block');
+            modal.style.display = 'none';
+            
+            const backdrops = document.querySelectorAll('.modal-backdrop, .fixed.inset-0.bg-black.bg-opacity-50');
+            backdrops.forEach(function(el) {
+                if (el.id !== modalId) {
+                    el.remove();
+                }
+            });
+            
+            document.body.classList.remove('overflow-hidden', 'modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            const bodyBackdrop = document.querySelector('body > .fixed.inset-0');
+            if (bodyBackdrop) {
+                bodyBackdrop.remove();
             }
         }
+    }
 
-        // Validación de observación para "otros"
-        if (tipo === 'otros' && observacion === '') {
-            $inputObservacion.addClass('is-invalid').focus();
-            $feedbackObs.show();
-            return;
-        }
-
-        // Validación de empleado
-        if (!$selectEmpleado.val()) {
-            $('#errorEmpleado').removeClass('hidden');
-            $selectEmpleado.addClass('border-red-500');
-            return;
+    // --------------------------------------------------------
+    // 6. FUNCIÓN PARA MOSTRAR NOTIFICACIONES FLASHER
+    // --------------------------------------------------------
+    function showFlasherNotification(type, message) {
+        // Usar el sistema de notificaciones de Flasher
+        if (typeof window.flasher !== 'undefined') {
+            // Si Flasher está disponible en el frontend
+            window.flasher[type](message);
         } else {
-            $('#errorEmpleado').addClass('hidden');
-            $selectEmpleado.removeClass('border-red-500');
-        }
-
-        const $btn = $('#btnGuardarMovimiento');
-        const $spinner = $('#spinnerGuardar');
-
-        $btn.prop('disabled', true);
-        $spinner.removeClass('d-none');
-
-        // Crear FormData
-        const formData = new FormData(this);
-        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
-        
-        // Asegurar que el monto se envía correctamente
-        formData.set('monto', montoVal || 0);
-
-        // Agregar campos adicionales que el backend espera
-        formData.append('empresa_id', 1); // O el ID de la empresa del usuario
-
-        $.ajax({
-            url: window.routes.nominaStore,
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Guardado!',
-                        text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false,
-                    });
-                    $('#modalNuevoMovimiento').modal('hide');
-                    $('#formNuevoMovimiento')[0].reset();
-                    $inputMonto.val(0).prop('readonly', false);
-                    $inputObservacion.removeClass('is-invalid');
-                    $feedbackObs.hide();
-                    tabla.ajax.reload();
+            // Fallback: usar el sistema de notificaciones del proyecto
+            // Esto intenta usar el sistema de notificaciones que ya tienes
+            if (typeof toastr !== 'undefined') {
+                // Si usas toastr
+                if (type === 'success') {
+                    toastr.success(message);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message || 'Error al guardar',
-                    });
+                    toastr.error(message);
                 }
-            },
-            error: function (xhr) {
-                let message = 'Ocurrió un error al guardar.';
-                if (xhr.responseJSON) {
-                    if (xhr.responseJSON.errors) {
-                        const errors = Object.values(xhr.responseJSON.errors).flat();
-                        message = errors.join('<br>');
-                    } else if (xhr.responseJSON.message) {
-                        message = xhr.responseJSON.message;
-                    }
-                }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    html: message,
-                });
-            },
-            complete: function () {
-                $btn.prop('disabled', false);
-                $spinner.addClass('d-none');
+            } else if (typeof notify !== 'undefined') {
+                // Si usas notify
+                notify(message, type);
+            } else {
+                // Último recurso: alert simple
+                alert(message);
             }
-        });
+        }
+    }
+
+// --------------------------------------------------------
+// 7. GUARDAR MOVIMIENTO
+// --------------------------------------------------------
+$('#formNuevoMovimiento').on('submit', function (e) {
+    e.preventDefault();
+
+    // Validar empleado
+    if (!$selectEmpleado.val()) {
+        $errorEmpleado.removeClass('hidden');
+        $selectEmpleado.addClass('border-red-500');
+        return;
+    } else {
+        $errorEmpleado.addClass('hidden');
+        $selectEmpleado.removeClass('border-red-500');
+    }
+
+    const tipo = $selectTipo.val();
+    const observacion = $inputObservacion.val().trim();
+    let montoVal = $inputMonto.val();
+
+    if ((!montoVal || montoVal === '0') && tipo === 'sueldo') {
+        const empleadoOption = $selectEmpleado.find('option:selected');
+        const salario = empleadoOption.data('salario');
+        if (salario && salario > 0) {
+            $inputMonto.val(salario);
+            montoVal = salario;
+        }
+    }
+
+    if (tipo === 'otros' && observacion === '') {
+        $inputObservacion.addClass('is-invalid').focus();
+        $feedbackObs.show();
+        return;
+    }
+
+    const $btn = $('#btnGuardarMovimiento');
+    const $spinner = $('#spinnerGuardar');
+
+    $btn.prop('disabled', true);
+    $spinner.removeClass('d-none');
+
+    const formData = new FormData(this);
+    formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+    formData.append('empresa_id', 1);
+
+    $.ajax({
+        url: window.routes.nominaStore,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            if (response.success) {
+                // 1. Cerrar modal
+                cerrarModal('modalNuevoMovimiento');
+                
+                // 2. Resetear formulario
+                $('#formNuevoMovimiento')[0].reset();
+                $inputMonto.val(0).prop('readonly', false);
+                $inputObservacion.removeClass('is-invalid');
+                $feedbackObs.hide();
+                $errorEmpleado.addClass('hidden');
+                $selectEmpleado.removeClass('border-red-500');
+                
+                // 3. Recargar la página para mostrar el flash
+                // Esto mantiene la consistencia con el login
+                window.location.reload();
+                
+            } else {
+                // Mostrar error sin recargar
+                showError(response.message || '❌ Error al guardar el movimiento.');
+            }
+        },
+        error: function (xhr) {
+            let message = '❌ Error al guardar el movimiento.';
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    const errors = Object.values(xhr.responseJSON.errors).flat();
+                    message = errors.join('<br>');
+                } else if (xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+            }
+            showError(message);
+        },
+        complete: function () {
+            $btn.prop('disabled', false);
+            $spinner.addClass('d-none');
+        }
+    });
+});
+
+    // --------------------------------------------------------
+    // 8. MANEJAR CIERRE DEL MODAL CON BOTÓN X
+    // --------------------------------------------------------
+    $('#modalNuevoMovimiento [data-modal-close]').on('click', function() {
+        cerrarModal('modalNuevoMovimiento');
     });
 
-    // Resetear formulario al cerrar modal
-    $('#modalNuevoMovimiento').on('hidden.bs.modal', function () {
-        $('#formNuevoMovimiento')[0].reset();
-        $inputMonto.val(0).prop('readonly', false);
-        $inputObservacion.removeClass('is-invalid');
-        $feedbackObs.hide();
-        $('#errorEmpleado').addClass('hidden');
-        $selectEmpleado.removeClass('border-red-500');
+    // Cerrar modal al hacer clic en el backdrop
+    $('#modalNuevoMovimiento').on('click', function(e) {
+        if (e.target === this) {
+            cerrarModal('modalNuevoMovimiento');
+        }
     });
 
     // --------------------------------------------------------
-    // 6. ANULAR MOVIMIENTO
+    // 9. ANULAR MOVIMIENTO
     // --------------------------------------------------------
     $('#tablaMovimientos tbody').on('click', '.btn-anular', function () {
         const id = $(this).data('id');
 
-        Swal.fire({
-            title: '¿Anular movimiento?',
-            text: 'Esta acción no se puede deshacer.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, anular',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#d33',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: window.routes.nominaAnular.replace(':id', id),
-                    method: 'POST',
-                    data: { 
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        _method: 'POST'
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Anulado',
-                                text: response.message,
-                                timer: 1500,
-                                showConfirmButton: false,
-                            });
-                            tabla.ajax.reload();
-                        }
-                    },
-                    error: function (xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: xhr.responseJSON?.message || 'No se pudo anular el movimiento.',
-                        });
+        if (confirm('¿Estás seguro de que deseas anular este movimiento?\nEsta acción no se puede deshacer.')) {
+            $.ajax({
+                url: window.routes.nominaAnular.replace(':id', id),
+                method: 'POST',
+                data: { 
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    if (response.success) {
+                        showFlasherNotification('success', response.message);
+                        tabla.ajax.reload(null, false);
+                    } else {
+                        showFlasherNotification('error', response.message);
                     }
-                });
-            }
-        });
+                },
+                error: function (xhr) {
+                    showFlasherNotification('error', xhr.responseJSON?.message || 'No se pudo anular el movimiento.');
+                }
+            });
+        }
     });
 });

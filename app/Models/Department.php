@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+
+    protected $connection = 'legacy';
+
+    protected $table = 'departments';
+    
     protected $fillable = [
         'department',
         'head_of',

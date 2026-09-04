@@ -106,14 +106,21 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
     });
 
     // -------------------------- nomina salarial ----------------------//
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/nomina', [NominaController::class, 'movimientos'])->name('nomina.movimientos');
-        Route::get('/nomina/data', [NominaController::class, 'movimientosData'])->name('nomina.movimientos.data');
-        Route::post('/nomina/store', [NominaController::class, 'store'])->name('nomina.movimientos.store');
-        Route::post('/nomina/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('nomina.movimientos.anular');
-        Route::get('/nomina/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('nomina.empleado.salario');
-        Route::get('/nomina/resumen', [NominaController::class, 'resumen'])->name('nomina.resumen');
-        Route::get('/nomina/resumen/excel', [NominaController::class, 'exportarExcel'])->name('nomina.resumen.excel');
-        Route::get('/nomina/resumen/csv', [NominaController::class, 'exportarCsv'])->name('nomina.resumen.csv');
+    Route::middleware(['auth'])->prefix('nomina')->name('nomina.')->group(function () {
+        // Rutas principales
+        Route::get('/', [NominaController::class, 'movimientos'])->name('movimientos');
+        Route::get('/data', [NominaController::class, 'movimientosData'])->name('movimientos.data');
+        Route::post('/', [NominaController::class, 'store'])->name('movimientos.store');
+        Route::post('/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('movimientos.anular');
+
+        // Rutas de edición
+        Route::get('/{id}/editar', [NominaController::class, 'edit'])->name('movimientos.edit');
+        Route::put('/{id}', [NominaController::class, 'update'])->name('movimientos.update');
+
+        // Otras rutas opcionales
+        Route::get('/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('empleado.salario');
+        Route::get('/resumen', [NominaController::class, 'resumen'])->name('resumen');
+        Route::get('/resumen/excel', [NominaController::class, 'exportarExcel'])->name('resumen.excel');
+        Route::get('/resumen/csv', [NominaController::class, 'exportarCsv'])->name('resumen.csv');
     });
 });

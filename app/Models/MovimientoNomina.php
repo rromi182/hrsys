@@ -11,6 +11,14 @@ class MovimientoNomina extends Model
 
     protected $table = 'movimientos_nomina';
 
+    // === CONSTANTES DE MONTOS PREDETERMINADOS ===
+    const MONTO_SUELDO = 3044000;
+    const MONTO_EXTRA = 500000;
+    const MONTO_VALE = 0;
+    const MONTO_AUSENCIA = 0;
+    const MONTO_LLEGADA_TARDIA = 0;
+    const MONTO_OTROS = 0;
+
     protected $fillable = [
         'empleado_id',
         'empresa_id',
@@ -34,6 +42,7 @@ class MovimientoNomina extends Model
         'mes' => 'integer',
     ];
 
+    // Relaciones
     public function empleado()
     {
         return $this->belongsTo(Empleado::class, 'empleado_id');
@@ -49,66 +58,86 @@ class MovimientoNomina extends Model
         return $this->belongsTo(User::class, 'creado_por');
     }
 
-    /**
-     * Scope para filtrar por estado activo
-     */
+    // Scopes
     public function scopeActivo($query)
     {
         return $query->where('estado', 'activo');
     }
 
-    /**
-     * Scope para filtrar por período (año y mes)
-     */
     public function scopePeriodo($query, $anio, $mes)
     {
         return $query->where('anio', $anio)->where('mes', $mes);
     }
 
-    /**
-     * Scope para filtrar por empresa
-     */
     public function scopeEmpresa($query, $empresaId)
     {
         return $query->where('empresa_id', $empresaId);
     }
 
-    /**
-     * Determina si el tipo de movimiento es ingreso (+) o descuento (-)
-     */
+    // Helpers
     public static function determinarNaturaleza(string $tipo): bool
     {
         $ingresos = ['sueldo', 'extra'];
         return in_array($tipo, $ingresos);
     }
 
-    /**
-     * Monto ajustado según naturaleza (positivo o negativo para cálculos)
-     */
     public function getMontoAjustadoAttribute(): int
     {
         return $this->es_ingreso ? $this->monto : -$this->monto;
     }
 
     /**
-     * Badge class para naturaleza
+     * Obtener el monto predeterminado para un tipo de movimiento
      */
-    public function getNaturalezaBadgeAttribute(): string
+    public static function getMontoPredeterminado(string $tipo): int
     {
-        return $this->es_ingreso
-            ? '<span class="badge bg-success-subtle text-success">Ingreso</span>'
-            : '<span class="badge bg-danger-subtle text-danger">Descuento</span>';
+        return match ($tipo) {
+            'sueldo' => self::MONTO_SUELDO,
+            'extra' => self::MONTO_EXTRA,
+            'vale' => self::MONTO_VALE,
+            'ausencia' => self::MONTO_AUSENCIA,
+            'llegada_tardia' => self::MONTO_LLEGADA_TARDIA,
+            'otros' => self::MONTO_OTROS,
+            default => 0,
+        };
     }
 
     /**
-     * Badge class para estado
+     * Obtener todos los tipos de movimiento con sus montos predeterminados
      */
-    public function getEstadoBadgeAttribute(): string
+    public static function getTiposConMontos(): array
     {
-        $badges = [
-            'activo'   => '<span class="badge bg-primary-subtle text-primary">Activo</span>',
-            'anulado'  => '<span class="badge bg-secondary-subtle text-secondary">Anulado</span>',
+        return [
+            'sueldo' => [
+                'label' => 'Sueldo',
+                'monto' => self::MONTO_SUELDO,
+                'es_ingreso' => true,
+            ],
+            'extra' => [
+                'label' => 'Extra',
+                'monto' => self::MONTO_EXTRA,
+                'es_ingreso' => true,
+            ],
+            'vale' => [
+                'label' => 'Vale',
+                'monto' => self::MONTO_VALE,
+                'es_ingreso' => false,
+            ],
+            'ausencia' => [
+                'label' => 'Ausencia',
+                'monto' => self::MONTO_AUSENCIA,
+                'es_ingreso' => false,
+            ],
+            'llegada_tardia' => [
+                'label' => 'Llegada Tardía',
+                'monto' => self::MONTO_LLEGADA_TARDIA,
+                'es_ingreso' => false,
+            ],
+            'otros' => [
+                'label' => 'Otros',
+                'monto' => self::MONTO_OTROS,
+                'es_ingreso' => false,
+            ],
         ];
-        return $badges[$this->estado] ?? $badges['activo'];
     }
 }

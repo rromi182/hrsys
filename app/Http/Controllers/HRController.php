@@ -154,7 +154,10 @@ class HRController extends Controller
     /** holiday Page */
     public function holidayPage()
     {
-        $holidayList = Holiday::all();
+        //$holidayList = Holiday::all();
+        $holidayList = DB::connection('legacy')
+        ->table('holidays')
+        ->get();
         return view('HR.holidays', compact('holidayList'));
     }
 
@@ -328,8 +331,13 @@ class HRController extends Controller
     /** department */
     public function department()
     {
-        $departmentList = Department::all();
-        return view('HR.department', compact('departmentList'));
+      //  $departmentList = Department::all();
+       $departmentList = DB::connection('legacy')
+        ->table('departments')
+        ->get();
+
+    return view('HR.department', compact('departmentList'));
+       // return view('HR.department', compact('departmentList'));
     }
 
     /** save record department */
