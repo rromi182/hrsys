@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HRController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\NominaController;
+use App\Http\Controllers\LiquidacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -20,15 +21,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('home', function () {
         return view('dashboard.home');
     });
-    Route::get('home', function () {
-        return view('dashboard.home');
-    });
 });
 
 Auth::routes();
 
 Route::group(['namespace' => 'App\Http\Controllers\Auth'], function () {
-    // -----------------------------login----------------------------------------//
     Route::controller(LoginController::class)->group(function () {
         Route::get('/login', 'login')->name('login');
         Route::post('/login', 'authenticate');
@@ -36,19 +33,16 @@ Route::group(['namespace' => 'App\Http\Controllers\Auth'], function () {
         Route::get('logout/page', 'logoutPage')->name('logout/page');
     });
 
-    // ------------------------------ register ----------------------------------//
     Route::controller(RegisterController::class)->group(function () {
         Route::get('/register', 'register')->name('register');
         Route::post('/register', 'storeUser')->name('register');
     });
 
-    // ----------------------------- forget password ----------------------------//
     Route::controller(ForgotPasswordController::class)->group(function () {
         Route::get('forget-password', 'getEmail')->name('forget-password');
         Route::post('forget-password', 'postEmail')->name('forget-password');
     });
 
-    // ----------------------------- reset password -----------------------------//
     Route::controller(ResetPasswordController::class)->group(function () {
         Route::get('reset-password/{token}', 'getPassword');
         Route::post('reset-password', 'updatePassword');
@@ -56,6 +50,7 @@ Route::group(['namespace' => 'App\Http\Controllers\Auth'], function () {
 });
 
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
+
     // -------------------------- main dashboard ----------------------//
     Route::controller(HomeController::class)->group(function () {
         Route::get('/home', 'index')->middleware('auth')->name('home');
@@ -96,7 +91,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         });
     });
 
-    /* --- Nuevas rutas para laravel (empleados reales) --- */
+    // -------------------------- empleados (nuevo) ----------------------//
     Route::middleware(['auth'])->prefix('hr')->group(function () {
         Route::get('/empleados/listado', [EmpleadoController::class, 'index'])->name('empleados.index');
         Route::post('/empleados/guardar', [EmpleadoController::class, 'store'])->name('empleados.store');
@@ -107,20 +102,32 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
     // -------------------------- nomina salarial ----------------------//
     Route::middleware(['auth'])->prefix('nomina')->name('nomina.')->group(function () {
-        // Rutas principales
+        // Movimientos
         Route::get('/', [NominaController::class, 'movimientos'])->name('movimientos');
         Route::get('/data', [NominaController::class, 'movimientosData'])->name('movimientos.data');
         Route::post('/', [NominaController::class, 'store'])->name('movimientos.store');
         Route::post('/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('movimientos.anular');
-
-        // Rutas de edición
         Route::get('/{id}/editar', [NominaController::class, 'edit'])->name('movimientos.edit');
         Route::put('/{id}', [NominaController::class, 'update'])->name('movimientos.update');
 
-        // Otras rutas opcionales
-        Route::get('/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('empleado.salario');
+        // Resumen
         Route::get('/resumen', [NominaController::class, 'resumen'])->name('resumen');
+        Route::get('/resumen/data', [NominaController::class, 'resumenData'])->name('resumen.data');
         Route::get('/resumen/excel', [NominaController::class, 'exportarExcel'])->name('resumen.excel');
         Route::get('/resumen/csv', [NominaController::class, 'exportarCsv'])->name('resumen.csv');
+        Route::get('/resumen/{empleadoId}/reporte', [NominaController::class, 'reporteIndividual'])->name('resumen.reporte');
+
+        // Otras rutas
+        Route::get('/empleado/{id}/salario', [NominaController::class, 'getEmpleadoSalario'])->name('empleado.salario');
     });
+});
+
+// ===== LIQUIDACIÓN (FUERA del grupo de nómina) =====
+Route::middleware(['auth'])->prefix('liquidacion')->name('liquidacion.')->group(function () {
+    Route::get('/', [LiquidacionController::class, 'index'])->name('index');
+    Route::get('/data', [LiquidacionController::class, 'data'])->name('data');
+    Route::post('/generar/{empleadoId}', [LiquidacionController::class, 'generar'])->name('generar');
+    Route::get('/{id}', [LiquidacionController::class, 'show'])->name('show');
+    Route::post('/{id}/pagar', [LiquidacionController::class, 'pagar'])->name('pagar');
+    Route::post('/{id}/anular', [LiquidacionController::class, 'anular'])->name('anular');
 });
