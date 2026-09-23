@@ -10,8 +10,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $connection = 'legacy'; // ← hrsys
-    protected $table = 'users';
+    //protected $connection = 'legacy'; // ← hrsys
+    //protected $table = 'users';
 
     protected $fillable = [
         'empleado_id', 
