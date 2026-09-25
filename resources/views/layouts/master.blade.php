@@ -230,7 +230,7 @@
                                         @else  
                                             <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
                                                 @php
-                                                $fullName = Session::get('name');
+                                                $fullName = Session::get('empleado_nombre');
                                                     $parts = explode(' ', $fullName);
                                                     $initials = '';
                                                     foreach ($parts as $part) {
@@ -243,7 +243,7 @@
                                     </div>
                                 </button>
                                 <div class="absolute z-50 hidden p-4 ltr:text-left rtl:text-right bg-white rounded-md shadow-md !top-4 dropdown-menu min-w-[14rem] dark:bg-zink-600" aria-labelledby="dropdownMenuButton">
-                                    <h6 class="mb-2 text-sm font-normal text-slate-500 dark:text-zink-300">Bienvenido {{ Session::get('name') }}</h6>
+                                    <h6 class="mb-2 text-sm font-normal text-slate-500 dark:text-zink-300">Bienvenido {{ Session::get('empleado_nombre') }}</h6>
                                     <a href="#!" class="flex gap-3 mb-3">
                                         <div class="relative inline-block shrink-0">
                                             <div class="rounded bg-slate-100 dark:bg-zink-500">
@@ -252,7 +252,7 @@
                                                 @else  
                                                     <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
                                                         @php
-                                                        $fullName = Session::get('name');
+                                                        $fullName = Session::get('empleado_nombre');
                                                             $parts = explode(' ', $fullName);
                                                             $initials = '';
                                                             foreach ($parts as $part) {
@@ -266,8 +266,8 @@
                                             <span class="-top-1 ltr:-right-1 rtl:-left-1 absolute w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full dark:border-zink-600"></span>
                                         </div>
                                         <div>
-                                            <h6 class="mb-1 text-15">{{ Session::get('name') }}</h6>
-                                            <p class="text-slate-500 dark:text-zink-300">{{ Session::get('position') }}</p>
+                                            <h6 class="mb-1 text-15">{{ Session::get('empleado_nombre') }}</h6>
+                                            <p class="text-slate-500 dark:text-zink-300">{{ Session::get('role_name') }}</p>
                                         </div>
                                     </a>
                                     <ul>

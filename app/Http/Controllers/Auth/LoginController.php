@@ -31,43 +31,39 @@ class LoginController extends Controller
     public function authenticate(Request $request)
     {
         $request->validate([
-            'email'    => 'required|string|email',
+            'email'    => 'required|string',
             'password' => 'required|string',
         ]);
-        
+
+        $login = $request->input('email');
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
         try {
-            if (Auth::attempt($request->only('email', 'password'))) {
+            if (Auth::attempt([$field => $login, 'password' => $request->password], $request->filled('remember'))) {
                 $user = Auth::user();
                 $todayDate = Carbon::now()->toDayDateTimeString();
 
-                // Store user information in session
                 Session::put([
-                    'name'         => $user->name,
-                    'email'        => $user->email,
-                    'user_id'      => $user->user_id,
-                    'join_date'    => $user->join_date,
-                    'last_login'   => $todayDate,
-                    'phone_number' => $user->phone_number,
-                    'location'     => $user->location,
-                    'status'       => $user->status,
-                    'role_name'    => $user->role_name,
-                    'avatar'       => $user->avatar,
-                    'position'     => $user->position,
-                    'department'   => $user->department,
+                    'name'       => $user->name,
+                    'empleado_nombre' => $user->empleado ? $user->empleado->nombres . ' ' . $user->empleado->apellidos : $user->name,   // fallback por si el usuario no tiene empleado asociado
+                    'email'      => $user->email,
+                    'user_id'    => $user->id,
+                    //'role_name'  => $user->role?->nombre,
+                    'role_name' => null,
+                    'last_login' => $todayDate,
                 ]);
-                
-                // Update last login
+
                 $user->update(['last_login' => $todayDate]);
 
                 flash()->success('Login exitoso :)');
                 return redirect()->intended('home');
-            } else {
-                flash()->error('Error: Usuario o contraseña incorrectos :)');
-                return redirect('login');
             }
+
+            flash()->error('Error: Usuario o contraseña incorrectos');
+            return redirect('login')->withInput($request->only('email'));
         } catch (\Exception $e) {
             \Log::error($e);
-            flash()->error('An error occurred during login :)');
+            flash()->error('An error occurred during login');
             return redirect()->back();
         }
     }
@@ -86,4 +82,14 @@ class LoginController extends Controller
         flash()->success('Logout successful :)');
         return redirect('logout/page');
     }
+
+    public function role()
+    {
+      //  return $this->belongsTo(\App\Models\Role::class, 'role_id');
+    }
+
+    public function empleado()
+{
+    return $this->belongsTo(\App\Models\Empleado::class, 'empleado_id');
+}
 }
