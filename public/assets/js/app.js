@@ -126,6 +126,8 @@ function updateHorizontalMenus() {
 function handleDropdownMenu() {
     const dropdownToggleButtons = document.querySelector("#scrollbar")?.querySelectorAll('.dropdown-button');
     dropdownToggleButtons.forEach((button, index) => {
+        if (button.dataset.dropdownBound) return;
+        button.dataset.dropdownBound = "1";
         const content = button.nextElementSibling;
         button.addEventListener('click', () => {
             if (!content) {
@@ -153,18 +155,18 @@ function handleDropdownMenu() {
                         // check if the dropdown menu goes outside the screen
                         var isDropdownOffScreen = (maxDropdownX > screenWidth) || (maxDropdownY > screenHeight);
 
-                            if (isDropdownOffScreen) {
-                                if (subMenus.classList.contains("group-data-[layout=horizontal]:left-full")) {
-                                    subMenus.classList.remove("group-data-[layout=horizontal]:left-full")
-                                    subMenus.classList.add("group-data-[layout=horizontal]:right-full")
-                                } else {
-                                    subMenus.classList.add("group-data-[layout=horizontal]:left-full")
-                                    subMenus.classList.remove("group-data-[layout=horizontal]:right-full")
-                                }
+                        if (isDropdownOffScreen) {
+                            if (subMenus.classList.contains("group-data-[layout=horizontal]:left-full")) {
+                                subMenus.classList.remove("group-data-[layout=horizontal]:left-full")
+                                subMenus.classList.add("group-data-[layout=horizontal]:right-full")
                             } else {
                                 subMenus.classList.add("group-data-[layout=horizontal]:left-full")
                                 subMenus.classList.remove("group-data-[layout=horizontal]:right-full")
                             }
+                        } else {
+                            subMenus.classList.add("group-data-[layout=horizontal]:left-full")
+                            subMenus.classList.remove("group-data-[layout=horizontal]:right-full")
+                        }
                     }
                 }
             }, 10);
@@ -266,7 +268,7 @@ function toggleHamburgerMenu() {
             document.documentElement.setAttribute("data-sidebar-size", "lg");
         }
         applyScrollbarLogic();
-        handleDropdownMenu();
+        //  handleDropdownMenu();
     } else {
         if (windowSize < 768) {
             // document.getElementById("sidebar-overlay").classList.remove("hidden")
@@ -649,29 +651,29 @@ function layoutSwitch(isLayoutAttributes) {
                     updateActiveBtn("diractionOne")
                     break;
             }
-            if(isLayoutAttributes["data-layout"] == "vertical")
-            switch (isLayoutAttributes["data-sidebar"]) {
-                case "light":
-                    setAttrItemAndTag("data-sidebar", "light");
-                    updateActiveBtn("sidebarColorOne")
-                    break;
-                case "dark":
-                    setAttrItemAndTag("data-sidebar", "dark");
-                    updateActiveBtn("sidebarColorTwo")
-                    break;
-                case "brand":
-                    setAttrItemAndTag("data-sidebar", "brand");
-                    updateActiveBtn("sidebarColorThree")
-                    break;
-                case "modern":
-                    setAttrItemAndTag("data-sidebar", "modern");
-                    updateActiveBtn("sidebarColorFour")
-                    break;
-                default:
-                    setAttrItemAndTag("data-sidebar", "light");
-                    updateActiveBtn("sidebarColorOne")
-                    break;
-            }
+            if (isLayoutAttributes["data-layout"] == "vertical")
+                switch (isLayoutAttributes["data-sidebar"]) {
+                    case "light":
+                        setAttrItemAndTag("data-sidebar", "light");
+                        updateActiveBtn("sidebarColorOne")
+                        break;
+                    case "dark":
+                        setAttrItemAndTag("data-sidebar", "dark");
+                        updateActiveBtn("sidebarColorTwo")
+                        break;
+                    case "brand":
+                        setAttrItemAndTag("data-sidebar", "brand");
+                        updateActiveBtn("sidebarColorThree")
+                        break;
+                    case "modern":
+                        setAttrItemAndTag("data-sidebar", "modern");
+                        updateActiveBtn("sidebarColorFour")
+                        break;
+                    default:
+                        setAttrItemAndTag("data-sidebar", "light");
+                        updateActiveBtn("sidebarColorOne")
+                        break;
+                }
             switch (isLayoutAttributes["data-topbar"]) {
                 case "light":
                     setAttrItemAndTag("data-topbar", "light");
@@ -690,25 +692,25 @@ function layoutSwitch(isLayoutAttributes) {
                     updateActiveBtn("sidebarColorOne")
                     break;
             }
-            if(isLayoutAttributes["data-layout"] == "vertical")
-            switch (isLayoutAttributes["data-sidebar-size"]) {
-                case "lg":
-                    setAttrItemAndTag("data-sidebar-size", "lg");
-                    updateActiveBtn("sidebarSizeOne")
-                    break;
-                case "md":
-                    setAttrItemAndTag("data-sidebar-size", "md");
-                    updateActiveBtn("sidebarSizeTwo")
-                    break;
-                case "sm":
-                    setAttrItemAndTag("data-sidebar-size", "sm");
-                    updateActiveBtn("sidebarSizeThree")
-                    break;
-                default:
-                    setAttrItemAndTag("data-sidebar-size", "lg");
-                    updateActiveBtn("sidebarSizeOne")
-                    break;
-            }
+            if (isLayoutAttributes["data-layout"] == "vertical")
+                switch (isLayoutAttributes["data-sidebar-size"]) {
+                    case "lg":
+                        setAttrItemAndTag("data-sidebar-size", "lg");
+                        updateActiveBtn("sidebarSizeOne")
+                        break;
+                    case "md":
+                        setAttrItemAndTag("data-sidebar-size", "md");
+                        updateActiveBtn("sidebarSizeTwo")
+                        break;
+                    case "sm":
+                        setAttrItemAndTag("data-sidebar-size", "sm");
+                        updateActiveBtn("sidebarSizeThree")
+                        break;
+                    default:
+                        setAttrItemAndTag("data-sidebar-size", "lg");
+                        updateActiveBtn("sidebarSizeOne")
+                        break;
+                }
         default:
             break;
     }
@@ -730,7 +732,10 @@ function initActiveMenu() {
     currentPath = currentPath.substring(currentPath.lastIndexOf("/") + 1);
     if (currentPath) {
         // navbar-nav
-        var a = document.getElementById("navbar-nav").querySelector('[href="' + currentPath + '"]');
+        //var a = document.getElementById("navbar-nav").querySelector('[href="' + currentPath + '"]');
+        var a = Array.from(document.getElementById("navbar-nav").querySelectorAll("a[href]")).find(function (x) {
+            return x.pathname.replace(/\/+$/, '') === location.pathname.replace(/\/+$/, '');
+        });
         if (a) {
             a.classList.add("active");
             var parentCollapseDiv = a.parentElement.parentElement.parentElement;
@@ -770,7 +775,7 @@ function initMenuItemScroll() {
         var currentPath = location.pathname == "/" ? "index.html" : location.pathname.substring(1);
         currentPath = currentPath.substring(currentPath.lastIndexOf("/") + 1);
         var activeMenu = document.getElementById("navbar-nav").querySelector('[href="' + currentPath + '"]');
-        const bodyHeight = (window.innerHeight/2) < 85 ? 85 : window.innerHeight/2;
+        const bodyHeight = (window.innerHeight / 2) < 85 ? 85 : window.innerHeight / 2;
         var offsetTopRelativeToBody = 0;
         while (activeMenu) {
             offsetTopRelativeToBody += activeMenu.offsetTop;
@@ -807,39 +812,39 @@ function windowLoadContent() {
     }
 }
 
-function initFilters(){
+function initFilters() {
     // filter btn
     const filterMain = document.querySelectorAll(".filter-btns");
     Array.from(filterMain).forEach(function (event) {
         const filterBtns = event?.querySelectorAll("a");
         const productItemsMain = document.getElementById(event?.getAttribute("data-filter-target"));
         const productItems = productItemsMain?.querySelectorAll(".product-item");
-        if(productItems)
-        Array.from(filterBtns).forEach(function (button) {
+        if (productItems)
+            Array.from(filterBtns).forEach(function (button) {
 
-            button.addEventListener("click", function (e) {
-                // e.preventDefault();
+                button.addEventListener("click", function (e) {
+                    // e.preventDefault();
 
-                for (var i = 0; i < filterBtns.length; i++) {
-                    filterBtns[i].classList.remove("active");
-                }
+                    for (var i = 0; i < filterBtns.length; i++) {
+                        filterBtns[i].classList.remove("active");
+                    }
 
-                this.classList.add("active");
+                    this.classList.add("active");
 
-                var filter = e.target.dataset.filter;
-                Array.from(productItems).forEach(function (item) {
-                    if (filter === "all") {
-                        item.style.display = "flex";
-                    } else {
-                        if (item.classList.contains(filter)) {
+                    var filter = e.target.dataset.filter;
+                    Array.from(productItems).forEach(function (item) {
+                        if (filter === "all") {
                             item.style.display = "flex";
                         } else {
-                            item.style.display = "none";
+                            if (item.classList.contains(filter)) {
+                                item.style.display = "flex";
+                            } else {
+                                item.style.display = "none";
+                            }
                         }
-                    }
+                    });
                 });
             });
-        });
     });
 }
 // Call the function when the page loads

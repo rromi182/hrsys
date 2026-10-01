@@ -2,16 +2,22 @@
 
 /** for side bar menu active */
 function set_active($route) {
-    if (is_array($route )){
-        return in_array(Request::path(), $route) ? 'active' : '';
+    if (is_array($route)) {
+        foreach ($route as $r) {
+            if (request()->is($r)) return 'active';
+        }
+        return '';
     }
-    return Request::path() == $route ? 'active' : '';
+    return request()->is($route) ? 'active' : '';
 }
 
 /** for side bar menu show */
 function set_show($route) {
-    if (is_array($route )){
-        return in_array(Request::path(), $route) ? 'show' : '';
+    if (is_array($route)) {
+        foreach ($route as $r) {
+            if (request()->is($r)) return 'show';
+        }
+        return '';
     }
-    return Request::path() == $route ? 'show' : '';
+    return request()->is($route) ? 'show' : '';
 }
