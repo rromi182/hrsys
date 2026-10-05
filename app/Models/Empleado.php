@@ -14,15 +14,37 @@ class Empleado extends Model
     // No hace falta poner $connection porque usa 'mysql' (laravel) por defecto
 
     protected $fillable = [
-        'nombres', 'apellidos', 'tipo_documento', 'numero_documento',
-        'fecha_nacimiento', 'sexo', 'estado_civil', 'nacionalidad',
-        'direccion', 'departamento_residencia', 'ciudad_residencia',
-        'telefono', 'correo', 'foto',
-        'empresa_id', 'sucursal_id', 'departamento_id', 'cargo_id',
-        'codigo_empleado', 'tipo_contrato_id', 'horario_id',
-        'fecha_ingreso', 'fecha_egreso', 'estado_laboral',
-        'jefe_inmediato_id', 'salario_base', 'numero_ips', 'profesion',
-        'estado', 'creado_por', 'actualizado_por'
+        'nombres',
+        'apellidos',
+        'tipo_documento',
+        'numero_documento',
+        'fecha_nacimiento',
+        'sexo',
+        'estado_civil',
+        'nacionalidad',
+        'direccion',
+        'departamento_residencia',
+        'ciudad_residencia',
+        'telefono',
+        'correo',
+        'foto',
+        'empresa_id',
+        'sucursal_id',
+        'departamento_id',
+        'cargo_id',
+        'codigo_empleado',
+        'tipo_contrato_id',
+        'horario_id',
+        'fecha_ingreso',
+        'fecha_egreso',
+        'estado',
+        'jefe_inmediato_id',
+        'salario_base',
+        'numero_ips',
+        'profesion',
+        'estado',
+        'creado_por',
+        'actualizado_por'
     ];
 
     protected $casts = [
@@ -72,6 +94,16 @@ class Empleado extends Model
             ->pluck('empleado_id');
 
         return $query->whereNotIn('id', $usados)
-                     ->where('estado_laboral', 'activo');
+            ->where('estado', 'activo');
+    }
+
+    public function tipoContrato()
+    {
+        return $this->belongsTo(TipoContrato::class, 'tipo_contrato_id');
+    }
+
+    public function horario()
+    {
+        return $this->belongsTo(HorarioLaboral::class, 'horario_id');
     }
 }

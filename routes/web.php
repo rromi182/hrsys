@@ -91,13 +91,16 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         });
     });
 
-    // -------------------------- empleados (nuevo) ----------------------//
-    Route::middleware(['auth'])->prefix('hr')->group(function () {
-        Route::get('/empleados/listado', [EmpleadoController::class, 'index'])->name('empleados.index');
-        Route::post('/empleados/guardar', [EmpleadoController::class, 'store'])->name('empleados.store');
-        Route::get('/empleados/{empleado}/ver', [EmpleadoController::class, 'show'])->name('empleados.show');
-        Route::put('/empleados/{empleado}/actualizar', [EmpleadoController::class, 'update'])->name('empleados.update');
-        Route::delete('/empleados/{empleado}/eliminar', [EmpleadoController::class, 'destroy'])->name('empleados.destroy');
+    // -------------------------- empleados / colaboradores ----------------------//
+    Route::middleware(['auth'])->prefix('hr')->name('empleados.')->group(function () {
+        Route::get('/empleados/listado', [EmpleadoController::class, 'index'])->name('index');
+        Route::post('/empleados/guardar', [EmpleadoController::class, 'store'])->name('store');
+        Route::get('/empleados/siguiente-codigo', [EmpleadoController::class, 'siguienteCodigo'])->name('siguiente-codigo');
+        Route::get('/empleados/{empleado}/ver', [EmpleadoController::class, 'show'])->name('show');
+        Route::put('/empleados/{empleado}/actualizar', [EmpleadoController::class, 'update'])->name('update');
+        Route::post('/empleados/{empleado}/anular', [EmpleadoController::class, 'anular'])->name('anular');
+        Route::post('/empleados/importar', [EmpleadoController::class, 'importar'])->name('importar');
+        Route::delete('/empleados/{empleado}/eliminar', [EmpleadoController::class, 'destroy'])->name('destroy');
     });
 
     // -------------------------- nomina salarial ----------------------//
