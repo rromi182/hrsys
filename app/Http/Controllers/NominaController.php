@@ -20,6 +20,7 @@ class NominaController extends Controller
             ->where('empresa_id', $empresaId)
             ->where('anio', $anio)
             ->where('mes', $mes)
+            ->where('estado', 'activo')
             ->orderBy('fecha', 'desc')
             ->orderBy('id', 'desc');
 
@@ -38,7 +39,7 @@ class NominaController extends Controller
             ->orderBy('apellidos')
             ->get();
 
-        return view('HR.nomina.movimientos', compact('movimientos', 'empleados', 'anio', 'mes'));
+        return view('HR.nomina.movimientos', compact('movimientos', 'empleados', 'anio', 'mes', 'empresaId'));
     }
 
     public function store(Request $request)
@@ -58,9 +59,12 @@ class NominaController extends Controller
             $tipo = $request->tipo_movimiento;
             $esIngreso = MovimientoNomina::determinarNaturaleza($tipo);
 
-            // Si el monto viene vacío o es 0, usar el predeterminado
+            $empleado = Empleado::findOrFail($request->empleado_id);
             $monto = (int) $request->monto;
-            if ($monto === 0) {
+
+            if ($monto === 0 && in_array($tipo, MovimientoNomina::TIPOS_INGRESO, true)) {
+                $monto = MovimientoNomina::montoBasePara($empleado, $tipo);
+            } elseif ($monto === 0) {
                 $monto = MovimientoNomina::getMontoPredeterminado($tipo);
             }
 
@@ -73,6 +77,7 @@ class NominaController extends Controller
                 'anio' => $fecha->year,
                 'mes' => $fecha->month,
                 'es_ingreso' => $esIngreso,
+                'generado_automaticamente' => false,
                 'observacion' => $request->observacion,
                 'estado' => 'activo',
                 'creado_por' => auth()->id(),
@@ -145,10 +150,11 @@ class NominaController extends Controller
             $tipo = $request->tipo_movimiento;
             $esIngreso = MovimientoNomina::determinarNaturaleza($tipo);
 
-            // Si el monto viene vacío o es 0, usar el predeterminado
+            $empleado = Empleado::findOrFail($request->empleado_id);
             $monto = (int) $request->monto;
-            if ($monto === 0) {
-                $monto = MovimientoNomina::getMontoPredeterminado($tipo);
+
+            if ($monto === 0 && in_array($tipo, MovimientoNomina::TIPOS_INGRESO, true)) {
+                $monto = MovimientoNomina::montoBasePara($empleado, $tipo);
             }
 
             $movimiento->update([
@@ -203,6 +209,56 @@ class NominaController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Error al anular el movimiento.');
+        }
+    }
+
+    /**
+     * Generar movimientos de sueldo y extra para todos los empleados activos del período.
+     * Es idempotente: si un movimiento ya existe, se omite.
+     */
+    public function generarMensual(Request $request)
+    {
+        $request->validate([
+            'anio' => 'required|integer|between:2020,2100',
+            'mes'  => 'required|integer|between:1,12',
+        ]);
+
+        try {
+            $resultado = app(\App\Services\GeneradorMovimientosNomina::class)
+                ->generarMes(
+                    (int) ($request->empresa_id ?? 1),
+                    (int) $request->anio,
+                    (int) $request->mes,
+                    auth()->id()
+                );
+
+            $msg = "✅ Se generaron {$resultado['creados']} movimientos.";
+            if ($resultado['omitidos'] > 0) {
+                $msg .= " Se omitieron {$resultado['omitidos']} que ya existían.";
+            }
+            if ($resultado['creados'] === 0 && $resultado['omitidos'] > 0) {
+                $msg = "ℹ️ Todos los movimientos del período ya existían. Nada que generar.";
+            }
+
+            return redirect()
+                ->route('nomina.movimientos', [
+                    'anio' => $request->anio,
+                    'mes'  => $request->mes,
+                ])
+                ->with('success', $msg);
+        } catch (\Throwable $e) {
+            \Log::error('Error al generar movimientos de nómina: ' . $e->getMessage(), [
+                'anio' => $request->anio,
+                'mes'  => $request->mes,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()
+                ->route('nomina.movimientos', [
+                    'anio' => $request->anio,
+                    'mes'  => $request->mes,
+                ])
+                ->with('error', 'Error al generar movimientos: ' . $e->getMessage());
         }
     }
 
@@ -329,6 +385,7 @@ class NominaController extends Controller
             ->where('empresa_id', $empresaId)
             ->where('anio', $anio)
             ->where('mes', $mes)
+            ->where('estado', 'activo')
             ->orderBy('fecha')
             ->get();
 

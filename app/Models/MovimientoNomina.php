@@ -18,6 +18,8 @@ class MovimientoNomina extends Model
     const MONTO_AUSENCIA = 0;
     const MONTO_LLEGADA_TARDIA = 0;
     const MONTO_OTROS = 0;
+    public const TIPOS_INGRESO  = ['sueldo', 'extra'];
+    public const TIPOS_DESCUENTO = ['vale', 'ausencia', 'llegada_tardia', 'otros'];
 
     protected $fillable = [
         'empleado_id',
@@ -29,6 +31,7 @@ class MovimientoNomina extends Model
         'anio',
         'mes',
         'es_ingreso',
+        'generado_automaticamente',
         'estado',
         'creado_por',
         'actualizado_por',
@@ -37,6 +40,7 @@ class MovimientoNomina extends Model
     protected $casts = [
         'fecha' => 'date',
         'es_ingreso' => 'boolean',
+        'generado_automaticamente' => 'boolean',
         'monto' => 'integer',
         'anio' => 'integer',
         'mes' => 'integer',
@@ -77,8 +81,7 @@ class MovimientoNomina extends Model
     // Helpers
     public static function determinarNaturaleza(string $tipo): bool
     {
-        $ingresos = ['sueldo', 'extra'];
-        return in_array($tipo, $ingresos);
+        return in_array($tipo, self::TIPOS_INGRESO, true);
     }
 
     public function getMontoAjustadoAttribute(): int
@@ -139,5 +142,14 @@ class MovimientoNomina extends Model
                 'es_ingreso' => false,
             ],
         ];
+    }
+
+    public static function montoBasePara(Empleado $empleado, string $tipo): int
+    {
+        return match ($tipo) {
+            'sueldo' => (int) ($empleado->salario_base ?: self::MONTO_SUELDO),
+            'extra'  => (int) ($empleado->extra_base  ?: self::MONTO_EXTRA),
+            default  => self::getMontoPredeterminado($tipo),
+        };
     }
 }

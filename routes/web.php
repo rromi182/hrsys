@@ -110,6 +110,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('/data', [NominaController::class, 'movimientosData'])->name('movimientos.data');
         Route::post('/', [NominaController::class, 'store'])->name('movimientos.store');
         Route::post('/anular/{id}', [NominaController::class, 'anularMovimiento'])->name('movimientos.anular');
+        Route::post('/generar-mensual', [NominaController::class, 'generarMensual'])->name('movimientos.generar');
         Route::get('/{id}/editar', [NominaController::class, 'edit'])->name('movimientos.edit');
         Route::put('/{id}', [NominaController::class, 'update'])->name('movimientos.update');
 

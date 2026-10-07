@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="light scroll-smooth group" data-layout="vertical" data-sidebar="light" data-sidebar-size="lg" data-mode="light" data-topbar="light" data-skin="default" data-navbar="sticky" data-content="fluid" dir="ltr">
+
 <head>
     <meta charset="utf-8">
     <title>HRSYS</title>
@@ -13,23 +14,118 @@
     <script src="{{ URL::to('assets/js/layout.js') }}"></script>
     <!-- StarCode CSS -->
     <link rel="stylesheet" href="{{ URL::to('assets/css/starcode2.css') }}">
-    
-    
-    <style>
-        .invalid-feedback {
-            color: red;
-        }
-        .is-invalid {
-            border-color: red;
-        }
-        .choices {
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 0px !important;
-            font-size: 16px;
-        }
-    </style>
+    <!-- Tom Select CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
+
+
+<style>
+    .invalid-feedback { color: red; }
+    .is-invalid { border-color: red; }
+
+    /* ============================================
+       Tom Select — Adaptado al theme
+       ============================================ */
+    .ts-wrapper {
+        width: 100%;
+    }
+
+    .ts-wrapper .ts-control {
+        background-color: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        min-height: 42px;
+        font-size: 14px;
+        color: #334155;
+        box-shadow: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .dark .ts-wrapper .ts-control {
+        background-color: #2a3142;
+        border-color: #3f4a63;
+        color: #e2e8f0;
+    }
+
+    .ts-wrapper.focus .ts-control {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .ts-wrapper .ts-control > input {
+        color: inherit;
+        font-size: 14px;
+    }
+
+    .ts-wrapper .ts-control > input::placeholder {
+        color: #94a3b8;
+    }
+
+    .ts-wrapper.single .ts-control::after {
+        border-color: #94a3b8 transparent transparent transparent;
+    }
+
+    .ts-wrapper.single.input-active .ts-control::after {
+        border-color: transparent transparent #6366f1 transparent;
+    }
+
+    /* Dropdown */
+    .ts-dropdown {
+        background-color: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.375rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        margin-top: 4px;
+        z-index: 9999;
+        padding: 0.25rem 0;
+    }
+
+    .dark .ts-dropdown {
+        background-color: #2a3142;
+        border-color: #3f4a63;
+        color: #e2e8f0;
+    }
+
+    .ts-dropdown .option {
+        padding: 0.5rem 0.75rem;
+        font-size: 14px;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .dark .ts-dropdown .option {
+        color: #e2e8f0;
+    }
+
+    .ts-dropdown .option:hover,
+    .ts-dropdown .option.active {
+        background-color: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .dark .ts-dropdown .option:hover,
+    .dark .ts-dropdown .option.active {
+        background-color: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+    }
+
+    .ts-dropdown .option.selected {
+        font-weight: 600;
+        color: #4f46e5;
+    }
+
+    .dark .ts-dropdown .option.selected {
+        color: #a5b4fc;
+    }
+
+    .ts-dropdown .no-results {
+        padding: 0.5rem 0.75rem;
+        color: #94a3b8;
+        font-style: italic;
+    }
+</style>
 </head>
+
 <body class="text-base bg-body-bg text-body font-public dark:text-zink-100 dark:bg-zink-800 group-data-[skin=bordered]:bg-body-bordered group-data-[skin=bordered]:dark:bg-zink-700">
     <div class="group-data-[sidebar-size=sm]:min-h-sm group-data-[sidebar-size=sm]:relative">
         <div class="app-menu w-vertical-menu bg-vertical-menu ltr:border-r rtl:border-l border-vertical-menu-border fixed bottom-0 top-0 z-[1003] transition-all duration-75 ease-linear group-data-[sidebar-size=md]:w-vertical-menu-md group-data-[sidebar-size=sm]:w-vertical-menu-sm group-data-[sidebar-size=sm]:pt-header group-data-[sidebar=dark]:bg-vertical-menu-dark group-data-[sidebar=dark]:border-vertical-menu-dark group-data-[sidebar=brand]:bg-vertical-menu-brand group-data-[sidebar=brand]:border-vertical-menu-brand group-data-[sidebar=modern]:bg-gradient-to-tr group-data-[sidebar=modern]:to-vertical-menu-to-modern group-data-[sidebar=modern]:from-vertical-menu-form-modern group-data-[layout=horizontal]:w-full group-data-[layout=horizontal]:bottom-auto group-data-[layout=horizontal]:top-header hidden md:block print:hidden group-data-[sidebar-size=sm]:absolute group-data-[sidebar=modern]:border-vertical-menu-border-modern group-data-[layout=horizontal]:dark:bg-zink-700 group-data-[layout=horizontal]:border-t group-data-[layout=horizontal]:dark:border-zink-500 group-data-[layout=horizontal]:border-r-0 group-data-[sidebar=dark]:dark:bg-zink-700 group-data-[sidebar=dark]:dark:border-zink-600 group-data-[layout=horizontal]:group-data-[navbar=scroll]:absolute group-data-[layout=horizontal]:group-data-[navbar=bordered]:top-[calc(theme('spacing.header')_+_theme('spacing.4'))] group-data-[layout=horizontal]:group-data-[navbar=bordered]:inset-x-4 group-data-[layout=horizontal]:group-data-[navbar=hidden]:top-0 group-data-[layout=horizontal]:group-data-[navbar=hidden]:h-16 group-data-[layout=horizontal]:group-data-[navbar=bordered]:w-[calc(100%_-_2rem)] group-data-[layout=horizontal]:group-data-[navbar=bordered]:[&.sticky]:top-header group-data-[layout=horizontal]:group-data-[navbar=bordered]:rounded-b-md group-data-[layout=horizontal]:shadow-md group-data-[layout=horizontal]:shadow-slate-500/10 group-data-[layout=horizontal]:dark:shadow-zink-500/10 group-data-[layout=horizontal]:opacity-0">
@@ -86,17 +182,17 @@
                                 </span>
                             </a>
                         </div>
-        
+
                         <button type="button" class="inline-flex relative justify-center items-center p-0 text-topbar-item transition-all w-[37.5px] h-[37.5px] duration-75 ease-linear bg-topbar rounded-md btn hover:bg-slate-100 group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:border-topbar-dark group-data-[topbar=dark]:text-topbar-item-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:border-topbar-brand group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:text-zink-200 group-data-[topbar=dark]:dark:border-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=dark]:dark:hover:text-zink-50 group-data-[layout=horizontal]:flex group-data-[layout=horizontal]:md:hidden hamburger-icon" id="topnav-hamburger-icon">
                             <i data-lucide="chevrons-left" class="w-5 h-5 group-data-[sidebar-size=sm]:hidden"></i>
                             <i data-lucide="chevrons-right" class="hidden w-5 h-5 group-data-[sidebar-size=sm]:block"></i>
                         </button>
-        
+
                         <div class="relative hidden ltr:ml-3 rtl:mr-3 lg:block group-data-[layout=horizontal]:hidden group-data-[layout=horizontal]:lg:block" style="display: none">
                             <input type="text" class="py-2 pr-4 text-sm text-topbar-item bg-topbar border border-topbar-border rounded pl-8 placeholder:text-slate-400 form-control focus-visible:outline-0 min-w-[300px] focus:border-blue-400 group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:border-topbar-border-dark group-data-[topbar=dark]:placeholder:text-slate-500 group-data-[topbar=dark]:text-topbar-item-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:border-topbar-border-brand group-data-[topbar=brand]:placeholder:text-blue-300 group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:border-zink-500 group-data-[topbar=dark]:dark:text-zink-100" placeholder="Search for ..." autocomplete="off">
                             <i data-lucide="search" class="inline-block size-4 absolute left-2.5 top-2.5 text-topbar-item fill-slate-100 group-data-[topbar=dark]:fill-topbar-item-bg-hover-dark group-data-[topbar=dark]:text-topbar-item-dark group-data-[topbar=brand]:fill-topbar-item-bg-hover-brand group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:text-zink-200 group-data-[topbar=dark]:dark:fill-zink-600"></i>
                         </div>
-        
+
                         <div class="flex gap-3 ms-auto">
                             <div class="relative flex items-center dropdown h-header" style="display:none">
                                 <button type="button" class="inline-flex justify-center items-center p-0 text-topbar-item transition-all w-[37.5px] h-[37.5px] duration-200 ease-linear bg-topbar rounded-md dropdown-toggle btn hover:bg-topbar-item-bg-hover hover:text-topbar-item-hover group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=dark]:dark:text-zink-500 group-data-[topbar=dark]:dark:hover:text-zink-50" id="flagsDropdown" data-bs-toggle="dropdown">
@@ -113,13 +209,13 @@
                                     </a>
                                 </div>
                             </div>
-        
+
                             <div class="relative flex items-center h-header">
                                 <button type="button" class="inline-flex relative justify-center items-center p-0 text-topbar-item transition-all w-[37.5px] h-[37.5px] duration-200 ease-linear bg-topbar rounded-md btn hover:bg-topbar-item-bg-hover hover:text-topbar-item-hover group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:hover:text-zink-50 group-data-[topbar=dark]:dark:text-zink-200 group-data-[topbar=dark]:text-topbar-item-dark" id="light-dark-mode">
                                     <i data-lucide="sun" class="inline-block w-5 h-5 stroke-1 fill-slate-100 group-data-[topbar=dark]:fill-topbar-item-bg-hover-dark group-data-[topbar=brand]:fill-topbar-item-bg-hover-brand"></i>
                                 </button>
                             </div>
-        
+
                             <div class="relative flex items-center dropdown h-header" style="display:none">
                                 <button type="button" class="inline-flex justify-center relative items-center p-0 text-topbar-item transition-all w-[37.5px] h-[37.5px] duration-200 ease-linear bg-topbar rounded-md dropdown-toggle btn hover:bg-topbar-item-bg-hover hover:text-topbar-item-hover group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:hover:text-zink-50 group-data-[topbar=dark]:dark:text-zink-200 group-data-[topbar=dark]:text-topbar-item-dark" id="notificationDropdown" data-bs-toggle="dropdown">
                                     <i data-lucide="bell-ring" class="inline-block w-5 h-5 stroke-1 fill-slate-100 group-data-[topbar=dark]:fill-topbar-item-bg-hover-dark group-data-[topbar=brand]:fill-topbar-item-bg-hover-brand"></i>
@@ -145,7 +241,7 @@
                                                 <a href="javascript:void(0);" data-filter="invite" class="inline-block nav-link px-1.5 w-full py-1 text-xs transition-all duration-300 ease-linear rounded-md text-slate-500 border border-transparent [&.active]:bg-white [&.active]:text-custom-500 hover:text-custom-500 active:text-custom-500 dark:text-zink-200 dark:hover:text-custom-500 dark:[&.active]:bg-zink-600 -mb-[1px]">Invites</a>
                                             </li>
                                         </ul>
-        
+
                                     </div>
                                     <div data-simplebar="" class="max-h-[350px]">
                                         <div class="flex flex-col gap-1" id="notification-list">
@@ -215,30 +311,30 @@
                                     </div>
                                 </div>
                             </div>
-        
+
                             <div class="relative items-center hidden h-header md:flex" style="display:none">
                                 <button data-drawer-target="customizerButton" type="button" class="inline-flex justify-center items-center p-0 text-topbar-item transition-all w-[37.5px] h-[37.5px] duration-200 ease-linear bg-topbar group-data-[topbar=dark]:text-topbar-item-dark rounded-md btn hover:bg-topbar-item-bg-hover hover:text-topbar-item-hover group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:hover:text-zink-50 group-data-[topbar=dark]:dark:text-zink-200">
                                     <i data-lucide="settings" class="inline-block w-5 h-5 stroke-1 fill-slate-100 group-data-[topbar=dark]:fill-topbar-item-bg-hover-dark group-data-[topbar=brand]:fill-topbar-item-bg-hover-brand"></i>
                                 </button>
                             </div>
-        
+
                             <div class="relative flex items-center dropdown h-header">
                                 <button type="button" class="inline-block p-0 transition-all duration-200 ease-linear bg-topbar rounded-full text-topbar-item dropdown-toggle btn hover:bg-topbar-item-bg-hover hover:text-topbar-item-hover group-data-[topbar=dark]:text-topbar-item-dark group-data-[topbar=dark]:bg-topbar-dark group-data-[topbar=dark]:hover:bg-topbar-item-bg-hover-dark group-data-[topbar=dark]:hover:text-topbar-item-hover-dark group-data-[topbar=brand]:bg-topbar-brand group-data-[topbar=brand]:hover:bg-topbar-item-bg-hover-brand group-data-[topbar=brand]:hover:text-topbar-item-hover-brand group-data-[topbar=dark]:dark:bg-zink-700 group-data-[topbar=dark]:dark:hover:bg-zink-600 group-data-[topbar=brand]:text-topbar-item-brand group-data-[topbar=dark]:dark:hover:text-zink-50 group-data-[topbar=dark]:dark:text-zink-200" id="dropdownMenuButton" data-bs-toggle="dropdown">
                                     <div class="bg-pink-100 rounded-full">
                                         @if(!empty(Session::get('avatar')))
-                                            <img src="{{ URL::to('assets/images/user/'.Session::get('avatar')) }}" alt="" class="w-[37.5px] h-[37.5px] rounded-full">
-                                        @else  
-                                            <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
-                                                @php
-                                                $fullName = Session::get('empleado_nombre');
-                                                    $parts = explode(' ', $fullName);
-                                                    $initials = '';
-                                                    foreach ($parts as $part) {
-                                                        $initials .= strtoupper(substr($part, 0, 1));
-                                                    }
-                                                @endphp
-                                                {{ $initials }}
-                                            </div>
+                                        <img src="{{ URL::to('assets/images/user/'.Session::get('avatar')) }}" alt="" class="w-[37.5px] h-[37.5px] rounded-full">
+                                        @else
+                                        <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
+                                            @php
+                                            $fullName = Session::get('empleado_nombre');
+                                            $parts = explode(' ', $fullName);
+                                            $initials = '';
+                                            foreach ($parts as $part) {
+                                            $initials .= strtoupper(substr($part, 0, 1));
+                                            }
+                                            @endphp
+                                            {{ $initials }}
+                                        </div>
                                         @endif
                                     </div>
                                 </button>
@@ -248,19 +344,19 @@
                                         <div class="relative inline-block shrink-0">
                                             <div class="rounded bg-slate-100 dark:bg-zink-500">
                                                 @if(!empty(Session::get('avatar')))
-                                                    <img src="{{ URL::to('assets/images/user/'.Session::get('avatar')) }}" alt="" class="w-[37.5px] h-[37.5px] rounded-full">
-                                                @else  
-                                                    <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
-                                                        @php
-                                                        $fullName = Session::get('empleado_nombre');
-                                                            $parts = explode(' ', $fullName);
-                                                            $initials = '';
-                                                            foreach ($parts as $part) {
-                                                                $initials .= strtoupper(substr($part, 0, 1));
-                                                            }
-                                                        @endphp
-                                                        {{ $initials }}
-                                                    </div>
+                                                <img src="{{ URL::to('assets/images/user/'.Session::get('avatar')) }}" alt="" class="w-[37.5px] h-[37.5px] rounded-full">
+                                                @else
+                                                <div class="flex items-center justify-center font-medium rounded-full size-10 shrink-0 bg-slate-200 text-slate-800 dark:text-zink-50 dark:bg-zink-600">
+                                                    @php
+                                                    $fullName = Session::get('empleado_nombre');
+                                                    $parts = explode(' ', $fullName);
+                                                    $initials = '';
+                                                    foreach ($parts as $part) {
+                                                    $initials .= strtoupper(substr($part, 0, 1));
+                                                    }
+                                                    @endphp
+                                                    {{ $initials }}
+                                                </div>
                                                 @endif
                                             </div>
                                             <span class="-top-1 ltr:-right-1 rtl:-left-1 absolute w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full dark:border-zink-600"></span>
@@ -278,7 +374,7 @@
                                         </li>
                                         <li style="display:none">
                                             <a class="block ltr:pr-4 rtl:pl-4 py-1.5 text-base font-medium transition-all duration-200 ease-linear text-slate-600 dropdown-item hover:text-custom-500 focus:text-custom-500 dark:text-zink-200 dark:hover:text-custom-500 dark:focus:text-custom-500" href="apps-mailbox.html">
-                                                <i data-lucide="mail" class="inline-block size-4 ltr:mr-2 rtl:ml-2"></i> Inbox 
+                                                <i data-lucide="mail" class="inline-block size-4 ltr:mr-2 rtl:ml-2"></i> Inbox
                                                 <span class="inline-flex items-center justify-center w-5 h-5 ltr:ml-2 rtl:mr-2 text-[11px] font-medium border rounded-full text-white bg-red-500 border-red-500">15</span>
                                             </a>
                                         </li>
@@ -289,7 +385,7 @@
                                         </li>
                                         <li style="display:none">
                                             <a class="block ltr:pr-4 rtl:pl-4 py-1.5 text-base font-medium transition-all duration-200 ease-linear text-slate-600 dropdown-item hover:text-custom-500 focus:text-custom-500 dark:text-zink-200 dark:hover:text-custom-500 dark:focus:text-custom-500" href="pages-pricing.html">
-                                                <i data-lucide="gem" class="inline-block size-4 ltr:mr-2 rtl:ml-2"></i> Upgrade 
+                                                <i data-lucide="gem" class="inline-block size-4 ltr:mr-2 rtl:ml-2"></i> Upgrade
                                                 <span class="inline-flex items-center justify-center w-auto h-5 ltr:ml-2 rtl:mr-2 px-1 text-[12px] font-medium border rounded text-white bg-sky-500 border-sky-500">Pro</span>
                                             </a>
                                         </li>
@@ -306,8 +402,8 @@
                 </div>
             </div>
         </header>
-    
-   
+
+
         <div class="relative min-h-screen group-data-[sidebar-size=sm]:min-h-sm">
             <!-- Page-content -->
             @yield('content')
@@ -318,7 +414,9 @@
                 <div class="group-data-[layout=horizontal]:mx-auto group-data-[layout=horizontal]:max-w-screen-2xl w-full">
                     <div class="grid items-center grid-cols-1 text-center lg:grid-cols-2 text-slate-400 dark:text-zink-200 ltr:lg:text-left rtl:lg:text-right">
                         <div>
-                            <script>document.write(new Date().getFullYear())</script> HRSYS
+                            <script>
+                                document.write(new Date().getFullYear())
+                            </script> HRSYS
                         </div>
                         <div class="hidden lg:block">
                             <div class="ltr:text-right rtl:text-left">
@@ -429,7 +527,7 @@
                         </label>
                         <h5 class="mt-2 text-center text-15">Default</h5>
                     </div>
-            
+
                     <div class="relative">
                         <input id="layoutSkitTwo" name="dataLayoutSkin" class="absolute w-4 h-4 border rounded-full appearance-none cursor-pointer ltr:right-2 rtl:left-2 top-2 vertical-menu-btn bg-slate-100 border-slate-300 checked:bg-custom-500 checked:border-custom-500 dark:bg-zink-400 dark:border-zink-500" type="radio" value="bordered" checked="">
                         <label class="block w-full h-24 p-0 overflow-hidden border rounded-lg cursor-pointer border-slate-200 dark:border-zink-500" for="layoutSkitTwo">
@@ -454,7 +552,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="mt-6">
                 <!-- data-mode="" -->
                 <h5 class="mb-3 underline capitalize text-15">Light & Dark</h5>
@@ -513,7 +611,7 @@
                     <button type="button" id="sidebarColorFour" name="sidebarColor" value="modern" class="flex items-center justify-center w-10 h-10 border rounded-md border-purple-950 bg-gradient-to-t from-red-400 to-purple-500 group"><i data-lucide="check" class="w-5 h-5 hidden group-[.active]:inline-block text-white"></i></button>
                 </div>
             </div>
-            
+
             <div class="mt-6">
                 <!-- data-topbar="" light, dark, brand, modern-->
                 <h5 class="mb-3 underline capitalize text-15">Topbar Colors</h5>
@@ -523,7 +621,7 @@
                     <button type="button" id="topbarColorThree" name="topbarColor" value="brand" class="flex items-center justify-center w-10 h-10 border rounded-md border-custom-800 bg-custom-800 group"><i data-lucide="check" class="w-5 h-5 hidden group-[.active]:inline-block text-white"></i></button>
                 </div>
             </div>
-            
+
         </div>
         <div class="flex items-center justify-between gap-3 p-4 border-t border-slate-200 dark:border-zink-500">
             <button type="button" id="reset-layout" class="w-full transition-all duration-200 ease-linear text-slate-500 btn bg-slate-200 border-slate-200 hover:text-slate-600 hover:bg-slate-300 hover:border-slate-300 focus:text-slate-600 focus:bg-slate-300 focus:border-slate-300 focus:ring focus:ring-slate-100">Reset</button>
@@ -541,7 +639,7 @@
     <script src="{{ URL::to('assets/libs/flatpickr/flatpickr.min.js') }}"></script>
     <!--apexchart js-->
     <script src="{{ URL::to('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
-    
+
     <script src="{{ URL::to('assets/js/datatables/jquery-3.7.0.js') }}"></script>
     <script src="{{ URL::to('assets/js/datatables/data-tables.min.js') }}"></script>
     <script src="{{ URL::to('assets/js/datatables/data-tables.tailwindcss.min.js') }}"></script>
@@ -552,16 +650,18 @@
     <script src="{{ URL::to('assets/js/datatables/buttons.html5.min.js') }}"></script>
     <script src="{{ URL::to('assets/js/datatables/buttons.print.min.js') }}"></script>
     <script src="{{ URL::to('assets/js/datatables/datatables.init.js') }}"></script>
-
+    <!-- Tom Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <!-- App js -->
     <script src="{{ URL::to('assets/js/app.js') }}"></script>
     <script>
-    window.routes = {
-        nominaData: "{{ route('nomina.movimientos.data') }}",
-        nominaStore: "{{ route('nomina.movimientos.store') }}",
-        nominaAnular: "{{ route('nomina.movimientos.anular', ':id') }}",
-    };
-</script>
+        window.routes = {
+            nominaData: "{{ route('nomina.movimientos.data') }}",
+            nominaStore: "{{ route('nomina.movimientos.store') }}",
+            nominaAnular: "{{ route('nomina.movimientos.anular', ':id') }}",
+        };
+    </script>
     @yield('scripts')
 </body>
+
 </html>

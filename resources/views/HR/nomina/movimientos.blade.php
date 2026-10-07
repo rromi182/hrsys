@@ -37,7 +37,7 @@
                         </select>
                     </div>
                     <div class="xl:col-span-3">
-                        <label class="inline-block mb-2 text-base font-medium">Empleado</label>
+                        <label class="inline-block mb-2 text-base font-medium">Colaborador</label>
                         <select name="empleado_id" class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 disabled:bg-slate-100 dark:disabled:bg-zink-600 disabled:border-slate-300 dark:disabled:border-zink-500 dark:disabled:text-zink-200 disabled:text-slate-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 placeholder:text-slate-400 dark:placeholder:text-zink-200 w-full">
                             <option value="">Todos</option>
                             @foreach($empleados as $emp)
@@ -72,8 +72,17 @@
             <div class="card-body">
                 <div class="flex items-center">
                     <h6 class="text-15 grow">Registro de salarios, extras, vales y descuentos</h6>
-                    <div class="shrink-0">
-                        <button data-modal-target="modalNuevoMovimiento" type="button" class="text-white btn bg-custom-500 border-custom-500 hover:text-white hover:bg-custom-600 hover:border-custom-600 focus:text-white focus:bg-custom-600 focus:border-custom-600 focus:ring focus:ring-custom-100 active:text-white active:bg-custom-600 active:border-custom-600 active:ring active:ring-custom-100 dark:ring-custom-400/20">
+                    <div class="shrink-0 flex gap-2">
+                        <!-- Botón Generar Sueldos/Extras -->
+                        <button type="button"
+                            data-modal-target="modalGenerarNomina"
+                            class="text-white btn bg-purple-500 border-purple-500 hover:text-white hover:bg-purple-600 hover:border-purple-600 focus:text-white focus:bg-purple-600 focus:border-purple-600 focus:ring focus:ring-purple-100 active:text-white active:bg-purple-600 active:border-purple-600 active:ring active:ring-purple-100 dark:ring-purple-400/20">
+                            <i data-lucide="sparkles" class="inline-block size-4"></i>
+                            <span class="align-middle">Generar Sueldos/Extras</span>
+                        </button>
+
+                        <!-- Botón Nuevo Movimiento -->
+                        <button data-modal-target="modalNuevoMovimiento" type="button" class="text-white btn bg-green-500 border-green-500 hover:text-white hover:bg-green-600 hover:border-green-600 focus:text-white focus:bg-green-600 focus:border-green-600 focus:ring focus:ring-green-100 active:text-white active:bg-green-600 active:border-green-600 active:ring active:ring-green-100 dark:ring-custom-400/20">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus inline-block size-4">
                                 <path d="M5 12h14"></path>
                                 <path d="M12 5v14"></path>
@@ -188,11 +197,19 @@
                 @csrf
                 <div class="grid grid-cols-1 gap-4 xl:grid-cols-12">
                     <div class="xl:col-span-12">
-                        <label for="empleado_id" class="inline-block mb-2 text-base font-medium">Empleado *</label>
-                        <select name="empleado_id" id="empleado_id" class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 disabled:bg-slate-100 dark:disabled:bg-zink-600 disabled:border-slate-300 dark:disabled:border-zink-500 dark:disabled:text-zink-200 disabled:text-slate-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 placeholder:text-slate-400 dark:placeholder:text-zink-200 w-full" required>
-                            <option value="">Seleccione...</option>
+                        <label for="empleado_id" class="inline-block mb-2 text-base font-medium">Seleccionar Colaborador *</label>
+                        <select name="empleado_id" id="empleado_id"
+                            class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 w-full"
+                            required>
+                            <option value=""></option>
                             @foreach($empleados as $emp)
-                            <option value="{{ $emp->id }}" {{ old('empleado_id') == $emp->id ? 'selected' : '' }}>{{ $emp->apellidos }}, {{ $emp->nombres }} (CI: {{ $emp->numero_documento }})</option>
+                            <option value="{{ $emp->id }}"
+                                data-salario="{{ $emp->salario_base }}"
+                                data-extra="{{ $emp->extra_base ?? \App\Models\MovimientoNomina::MONTO_EXTRA }}"
+                                data-ci="{{ $emp->numero_documento }}"
+                                {{ old('empleado_id') == $emp->id ? 'selected' : '' }}>
+                                {{ $emp->apellidos }}, {{ $emp->nombres }} — CI: {{ $emp->numero_documento }}
+                            </option>
                             @endforeach
                         </select>
                         @error('empleado_id')
@@ -217,7 +234,7 @@
                                 data-monto="{{ $data['monto'] }}"
                                 data-es-ingreso="{{ $data['es_ingreso'] ? 'true' : 'false' }}"
                                 {{ old('tipo_movimiento') == $valor ? 'selected' : '' }}>
-                                {{ $data['label'] }}  
+                                {{ $data['label'] }}
                             </option>
                             @endforeach
                         </select>
@@ -253,6 +270,56 @@
 </div>
 <!--end modal nuevo movimiento-->
 
+<!-- Modal Generar Sueldos/Extras (confirmación) -->
+<div id="modalGenerarNomina" modal-center="" class="fixed flex flex-col hidden transition-all duration-300 ease-in-out left-2/4 z-drawer -translate-x-2/4 -translate-y-2/4 show">
+    <div class="w-screen md:w-[30rem] bg-white shadow rounded-md dark:bg-zink-600">
+        <div class="max-h-[calc(theme('height.screen')_-_180px)] overflow-y-auto px-6 py-8">
+            <div class="float-right">
+                <button data-modal-close="modalGenerarNomina" class="transition-all duration-200 ease-linear text-slate-500 hover:text-red-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="text-center">
+                <div class="flex items-center justify-center mx-auto mb-4 rounded-full size-16 bg-purple-100 dark:bg-purple-500/20">
+                    <i data-lucide="sparkles" class="size-8 text-purple-600 dark:text-purple-300"></i>
+                </div>
+
+                <h5 class="mb-2">¿Generar Sueldos y Extras?</h5>
+                <p class="text-slate-500 dark:text-zink-200">
+                    Se generarán los movimientos de <strong>Sueldo</strong> y <strong>Extra</strong> para todos los empleados activos del período:
+                </p>
+                <p class="mt-3 text-lg font-bold text-custom-500">
+                    {{ str_pad($mes, 2, '0', STR_PAD_LEFT) }}/{{ $anio }}
+                </p>
+                <p class="mt-2 text-sm text-slate-500 dark:text-zink-200">
+                    Los movimientos que ya existan serán <strong>omitidos</strong> automáticamente.
+                </p>
+
+                <form action="{{ route('nomina.movimientos.generar') }}" method="POST" class="mt-6">
+                    @csrf
+                    <input type="hidden" name="anio" value="{{ $anio }}">
+                    <input type="hidden" name="mes" value="{{ $mes }}">
+                    <input type="hidden" name="empresa_id" value="{{ $empresaId ?? 1 }}">
+
+                    <div class="flex justify-center gap-2">
+                        <button type="button" data-modal-close="modalGenerarNomina"
+                            class="bg-white text-slate-500 btn hover:text-slate-500 hover:bg-slate-100 focus:text-slate-500 focus:bg-slate-100 active:text-slate-500 active:bg-slate-100 dark:bg-zink-600 dark:hover:bg-slate-500/10 dark:focus:bg-slate-500/10 dark:active:bg-slate-500/10">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="text-white bg-purple-500 border-purple-500 btn hover:text-white hover:bg-purple-600 hover:border-purple-600 focus:text-white focus:bg-purple-600 focus:border-purple-600 focus:ring focus:ring-purple-100 active:text-white active:bg-purple-600 active:border-purple-600 active:ring active:ring-purple-100 dark:ring-purple-400/20">
+                            <i data-lucide="check" class="inline-block size-4"></i>
+                            <span class="align-middle">Sí, Generar</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end modal generar nómina-->
+
 <!-- Modal Editar Movimiento -->
 <div id="modalEditarMovimiento" modal-center="" class="fixed flex flex-col hidden transition-all duration-300 ease-in-out left-2/4 z-drawer -translate-x-2/4 -translate-y-2/4 show">
     <div class="w-screen md:w-[40rem] bg-white shadow rounded-md dark:bg-zink-600">
@@ -269,12 +336,19 @@
                 <input type="hidden" name="id_editar" id="e_idEditar" value="">
 
                 <div class="grid grid-cols-1 gap-4 xl:grid-cols-12">
-                    <div class="xl:col-span-12">
-                        <label class="inline-block mb-2 text-base font-medium">Empleado *</label>
-                        <select name="empleado_id" id="e_empleado_id" class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 disabled:bg-slate-100 dark:disabled:bg-zink-600 disabled:border-slate-300 dark:disabled:border-zink-500 dark:disabled:text-zink-200 disabled:text-slate-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 placeholder:text-slate-400 dark:placeholder:text-zink-200 w-full" required>
-                            <option value="">Seleccione...</option>
+                    <div class="xl:col-span-12" readonly>
+                        <label class="inline-block mb-2 text-base font-medium">Seleccionar Colaborador *</label>
+                        <select name="empleado_id" id="e_empleado_id"
+                            class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 w-full"
+                            required>
+                            <option value=""></option>
                             @foreach($empleados as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->apellidos }}, {{ $emp->nombres }} (CI: {{ $emp->numero_documento }})</option>
+                            <option value="{{ $emp->id }}"
+                                data-salario="{{ $emp->salario_base }}"
+                                data-extra="{{ $emp->extra_base ?? \App\Models\MovimientoNomina::MONTO_EXTRA }}"
+                                data-ci="{{ $emp->numero_documento }}">
+                                {{ $emp->apellidos }}, {{ $emp->nombres }} — CI: {{ $emp->numero_documento }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -348,89 +422,173 @@
 <!--end modal anular-->
 
 @section('scripts')
-<!-- Anular JS - Mismo estilo que holiday y employee -->
 <script>
-    $(document).on('click', '#editarMovimiento', function() {
-        var _this = $(this);
-        var id = _this.data('id');
+$(document).ready(function () {
 
-        // Cargar datos del movimiento via AJAX
+    // ============================================
+    // Tom Select — Búsqueda dinámica de colaboradores
+    // ============================================
+    var tomSelectNuevo = null;
+    var tomSelectEditar = null;
+
+    function initTomSelect(selector) {
+        if (typeof TomSelect === 'undefined') {
+            console.warn('Tom Select no está cargado');
+            return null;
+        }
+
+        return new TomSelect(selector, {
+            searchField: ['text'],
+            maxOptions: 200,
+            allowEmptyOption: true,
+            loadThrottle: 150,
+            placeholder: 'Buscar colaborador...',
+            // Disparar change sobre el <select> original cuando cambia
+            onChange: function (value) {
+                var sel = document.querySelector(selector);
+                if (sel) {
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+        });
+    }
+
+    tomSelectNuevo  = initTomSelect('#empleado_id');
+    tomSelectEditar = initTomSelect('#e_empleado_id');
+
+
+    // ============================================
+    // Recalcular monto — Nuevo Movimiento
+    // ============================================
+function recalcularMontoNuevo() {
+    var empleadoId = $('#empleado_id').val();
+    var tipo = $('#tipo_movimiento').val();
+
+    // Si no hay tipo seleccionado, resetear a 0
+    if (!tipo) {
+        $('#monto').val(0);
+        return;
+    }
+
+    var opt = $('#empleado_id').find('option[value="' + empleadoId + '"]');
+    var monto = 0;
+
+    if (empleadoId) {
+        if (tipo === 'sueldo')      monto = parseInt(opt.data('salario')) || 0;
+        else if (tipo === 'extra')  monto = parseInt(opt.data('extra'))   || 0;
+    }
+
+    // Siempre asignamos el valor (aunque sea 0)
+    $('#monto').val(monto);
+}
+
+    $(document).on('change', '#tipo_movimiento', recalcularMontoNuevo);
+
+
+    // ============================================
+    // Recalcular monto — Editar Movimiento
+    // ============================================
+function recalcularMontoEditar() {
+    var empleadoId = $('#e_empleado_id').val();
+    var tipo = $('#e_tipo_movimiento').val();
+
+    // Si no hay tipo seleccionado, resetear a 0
+    if (!tipo) {
+        $('#e_monto').val(0);
+        return;
+    }
+
+    var opt = $('#e_empleado_id').find('option[value="' + empleadoId + '"]');
+    var monto = 0;
+
+    if (empleadoId) {
+        if (tipo === 'sueldo')      monto = parseInt(opt.data('salario')) || 0;
+        else if (tipo === 'extra')  monto = parseInt(opt.data('extra'))   || 0;
+    }
+
+    // Siempre asignamos el valor (aunque sea 0)
+    $('#e_monto').val(monto);
+}
+
+    $(document).on('change', '#e_tipo_movimiento', recalcularMontoEditar);
+
+
+    // ============================================
+    // Editar movimiento
+    // ============================================
+    $(document).on('click', '#editarMovimiento', function () {
+        var id = $(this).data('id');
+
         $.ajax({
             url: "{{ route('nomina.movimientos.edit', ['id' => ':id']) }}".replace(':id', id),
             type: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    var data = response.data;
+            success: function (response) {
+                if (!response.success) return;
+                var data = response.data;
 
-                    // Actualizar action del form
-                    var url = "{{ route('nomina.movimientos.update', ['id' => ':id']) }}";
-                    url = url.replace(':id', id);
-                    $('#formEditarMovimiento').attr('action', url);
+                var url = "{{ route('nomina.movimientos.update', ['id' => ':id']) }}".replace(':id', id);
+                $('#formEditarMovimiento').attr('action', url);
 
-                    // Llenar campos del modal
-                    $('#e_idEditar').val(data.id);
-                    $('#e_empleado_id').val(data.empleado_id).trigger('change');
-                    $('#e_fecha').val(data.fecha);
-                    $('#e_tipo_movimiento').val(data.tipo_movimiento).trigger('change');
-                    $('#e_monto').val(data.monto);
-                    $('#e_observacion').val(data.observacion || '');
+                $('#e_idEditar').val(data.id);
+
+                // Tom Select: silent = no dispara onChange
+                if (tomSelectEditar) {
+                    tomSelectEditar.setValue(String(data.empleado_id), true);
+                } else {
+                    $('#e_empleado_id').val(data.empleado_id);
                 }
+
+                $('#e_fecha').val(data.fecha);
+                $('#e_tipo_movimiento').val(data.tipo_movimiento);
+                $('#e_monto').val(data.monto);
+                $('#e_observacion').val(data.observacion || '');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 var message = 'Error al cargar los datos.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    message = xhr.responseJSON.message;
-                }
-                flasher.error(message);
-
-                // Cerrar modal y mostrar error
-                $('#modalEditarMovimiento').addClass('hidden');
-                $('#modalEditarMovimiento').css('display', 'none');
+                if (xhr.responseJSON && xhr.responseJSON.message) message = xhr.responseJSON.message;
+                if (typeof flasher !== 'undefined') flasher.error(message);
+                $('#modalEditarMovimiento').addClass('hidden').css('display', 'none');
             }
         });
     });
 
-     $(document).ready(function() {
-        // Auto-completar monto al seleccionar tipo
-        $('#tipo_movimiento').on('change', function() {
-            var selectedOption = $(this).find('option:selected');
-            var monto = selectedOption.data('monto');
-            var esIngreso = selectedOption.data('es-ingreso');
-            
-            // Si el monto es 0, dejar que el usuario lo ingrese
-            if (monto > 0) {
-                $('#monto').val(monto).prop('readonly', true);
-            } else {
-                $('#monto').val(0).prop('readonly', false);
-            }
-        });
-        
-        // Para el modal de edición
-        $('#e_tipo_movimiento').on('change', function() {
-            var selectedOption = $(this).find('option:selected');
-            var monto = selectedOption.data('monto');
-            
-            if (monto > 0) {
-                $('#e_monto').val(monto).prop('readonly', true);
-            } else {
-                $('#e_monto').val(0).prop('readonly', false);
-            }
-        });
-    });
 
-    $(document).on('click', '#anularMovimiento', function() {
-        var _this = $(this);
-        var id = _this.data('id');
-        var monto = _this.data('monto');
+    // ============================================
+    // Anular movimiento
+    // ============================================
+    $(document).on('click', '#anularMovimiento', function () {
+        var id = $(this).data('id');
+        var monto = $(this).data('monto');
 
         $('#e_idAnular').val(id);
         $('#anularMontoDisplay').text(monto);
 
-        // Actualizar action del form
-        var url = "{{ route('nomina.movimientos.anular', ['id' => ':id']) }}";
-        url = url.replace(':id', id);
+        var url = "{{ route('nomina.movimientos.anular', ['id' => ':id']) }}".replace(':id', id);
         $('#formAnular').attr('action', url);
     });
+
+
+    // ============================================
+    // Limpiar al cerrar el modal Nuevo Movimiento
+    // ============================================
+    $(document).on('click', '[data-modal-close="modalNuevoMovimiento"]', function () {
+        if (tomSelectNuevo) tomSelectNuevo.clear(true);
+        $('#tipo_movimiento').val('').trigger('change');
+        $('#monto').val(0);
+        $('#observacion').val('');
+    });
+
+
+    // ============================================
+    // Limpiar al cerrar el modal Editar Movimiento
+    // ============================================
+    $(document).on('click', '[data-modal-close="modalEditarMovimiento"]', function () {
+        if (tomSelectEditar) tomSelectEditar.clear(true);
+    });
+
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
 </script>
 @endsection
 @endsection
