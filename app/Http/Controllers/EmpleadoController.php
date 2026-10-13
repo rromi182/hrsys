@@ -26,6 +26,7 @@ class EmpleadoController extends Controller
     public function index()
     {
         $empleados = Empleado::with(['empresa', 'sucursal', 'departamento', 'cargo'])
+            ->where('estado', 'activo')
             ->orderBy('apellidos')
             ->orderBy('nombres')
             ->get();

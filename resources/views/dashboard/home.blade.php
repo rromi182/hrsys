@@ -10,7 +10,7 @@
             <div class="grow">
                 <h5 class="text-16">Panel de Recursos Humanos</h5>
                 <p class="text-sm text-slate-500 dark:text-zink-200 mt-1">
-                    Bienvenido/a de nuevo, aquí está el resumen de tu equipo
+                    Resumen financiero de nómina y movimientos del mes
                 </p>
             </div>
 
@@ -30,92 +30,100 @@
             </div>
         </div>
 
-        {{-- ============ KPI CARDS ============ --}}
+        {{-- ============ KPI CARDS FINANCIERAS ============ --}}
         <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
 
-            {{-- Colaboradores Activos --}}
+            {{-- 1 Neto a pagar del mes --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Colaboradores Activos</p>
-                            <h5 class="mt-2 text-2xl font-bold">{{ $totalEmpleadosActivos }}</h5>
-                        </div>
-                        <div class="flex items-center justify-center w-12 h-12 text-green-500 bg-green-100 rounded-full dark:bg-green-500/20">
-                            <i data-lucide="users" class="size-6"></i>
-                        </div>
-                    </div>
-                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
-                        <span class="text-green-500">↗ {{ $nuevosIngresos }}</span> nuevos este mes
-                    </p>
-                </div>
-            </div>
-
-            {{-- Salario Promedio --}}
-            <div class="card">
-                <div class="card-body">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-500 dark:text-zink-200">Salario Promedio</p>
-                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($salarioPromedio, 0, ',', '.') }}</h5>
+                            <p class="text-slate-500 dark:text-zink-200">Neto a Pagar ({{ now()->translatedFormat('F') }})</p>
+                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($totalNetoMes, 0, ',', '.') }}</h5>
                         </div>
                         <div class="flex items-center justify-center w-12 h-12 text-blue-500 bg-blue-100 rounded-full dark:bg-blue-500/20">
                             <i data-lucide="wallet" class="size-6"></i>
                         </div>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">Basado en colaboradores activos</p>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
+                        <span class="text-green-500">↗ Gs. {{ number_format($totalIngresosMes, 0, ',', '.') }}</span> ingresos ·
+                        <span class="text-red-500">↘ Gs. {{ number_format($totalDescuentosMes, 0, ',', '.') }}</span> descuentos
+                    </p>
                 </div>
             </div>
 
-            {{-- Departamentos --}}
+            {{-- 2 Liquidaciones pendientes de pago --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Departamentos</p>
-                            <h5 class="mt-2 text-2xl font-bold">{{ $totalDepartamentos }}</h5>
+                            <p class="text-slate-500 dark:text-zink-200">Pendientes de Pago</p>
+                            <h5 class="mt-2 text-2xl font-bold">{{ $totalPendienteCount }}</h5>
+                        </div>
+                        <div class="flex items-center justify-center w-12 h-12 text-amber-500 bg-amber-100 rounded-full dark:bg-amber-500/20">
+                            <i data-lucide="hourglass" class="size-6"></i>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
+                        Por un total de <span class="font-semibold text-amber-500">Gs. {{ number_format($totalPendienteMonto, 0, ',', '.') }}</span>
+                    </p>
+                </div>
+            </div>
+
+            {{-- 3 Aportes IPS del mes --}}
+            <div class="card">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 dark:text-zink-200">Aportes IPS ({{ now()->translatedFormat('F') }})</p>
+                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($totalIpsMes, 0, ',', '.') }}</h5>
                         </div>
                         <div class="flex items-center justify-center w-12 h-12 text-purple-500 bg-purple-100 rounded-full dark:bg-purple-500/20">
-                            <i data-lucide="building-2" class="size-6"></i>
+                            <i data-lucide="shield-check" class="size-6"></i>
                         </div>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">Unidades organizativas activas</p>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
+                        Costo promedio/colaborador: <span class="font-semibold">Gs. {{ number_format($costoPromedio, 0, ',', '.') }}</span>
+                    </p>
                 </div>
             </div>
 
-            {{-- Cargos --}}
+            {{-- 4) Movimientos del mes --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Cargos Registrados</p>
-                            <h5 class="mt-2 text-2xl font-bold">{{ $totalCargos }}</h5>
+                            <p class="text-slate-500 dark:text-zink-200">Vales / Adelantos ({{ now()->translatedFormat('F') }})</p>
+                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($valesMes, 0, ',', '.') }}</h5>
                         </div>
-                        <div class="flex items-center justify-center w-12 h-12 text-orange-500 bg-orange-100 rounded-full dark:bg-orange-500/20">
-                            <i data-lucide="briefcase" class="size-6"></i>
+                        <div class="flex items-center justify-center w-12 h-12 text-red-500 bg-red-100 rounded-full dark:bg-red-500/20">
+                            <i data-lucide="hand-coins" class="size-6"></i>
                         </div>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">Total de cargos en el sistema</p>
+                    <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
+                        Extras: <span class="text-green-500">+ Gs. {{ number_format($extrasMes, 0, ',', '.') }}</span> ·
+                        Desc. por inasistencias: <span class="text-red-500">Gs. {{ number_format($inasistenciasMes, 0, ',', '.') }}</span>
+                    </p>
                 </div>
             </div>
         </div>
 
-        {{-- ============ GRÁFICOS ============ --}}
+        {{-- ============ GRÁFICOS FINANCIEROS ============ --}}
         <div class="grid grid-cols-1 gap-5 mt-5 lg:grid-cols-3">
 
-            {{-- Gráfico 1: Distribución por estado --}}
-            <div class="card">
+            {{-- Gráfico 1: Evolución del neto pagado últimos 6 meses --}}
+            <div class="card lg:col-span-2">
                 <div class="card-body">
-                    <h6 class="text-15 mb-4">Colaboradores por Estado</h6>
-                    <div id="chartEstado" style="min-height: 300px;"></div>
+                    <h6 class="text-15 mb-4">Evolución del Neto Pagado (últimos 6 meses)</h6>
+                    <div id="chartEvolucion" style="min-height: 300px;"></div>
                 </div>
             </div>
 
-            {{-- Gráfico 2: Distribución por departamento --}}
-            <div class="card lg:col-span-2">
+            {{-- Gráfico 2: Ingresos vs Descuentos --}}
+            <div class="card">
                 <div class="card-body">
-                    <h6 class="text-15 mb-4">Colaboradores por Departamento</h6>
-                    <div id="chartDepartamento" style="min-height: 300px;"></div>
+                    <h6 class="text-15 mb-4">Ingresos vs Descuentos</h6>
+                    <div id="chartComparativa" style="min-height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -196,8 +204,11 @@
 {{-- Datos para JS --}}
 <script>
     window.dashData = {
-        estado:       @json($porEstado),
-        departamento: @json($porDepartamento),
+        evolucionLabels:  @json($evolucionLabels),
+        evolucionSeries:  @json($evolucionSeries),
+        compLabels:       @json($compLabels),
+        compIngresos:     @json($compIngresos),
+        compDescuentos:   @json($compDescuentos),
     };
 </script>
 
@@ -263,56 +274,80 @@ $(document).ready(function () {
     // ===== ApexCharts =====
     if (typeof ApexCharts !== 'undefined') {
 
-        // 1) Colaboradores por estado (donut)
-        const estadoLabels = Object.keys(window.dashData.estado).map(k => k.charAt(0).toUpperCase() + k.slice(1));
-        const estadoSeries = Object.values(window.dashData.estado).map(v => parseInt(v));
-
-        if (estadoSeries.length) {
-            new ApexCharts(document.querySelector('#chartEstado'), {
-                chart: { type: 'donut', height: 300, fontFamily: 'inherit' },
-                series: estadoSeries,
-                labels: estadoLabels,
-                colors: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#94a3b8'],
-                legend: { position: 'bottom' },
-                dataLabels: { enabled: true, formatter: v => Math.round(v) + '%' },
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '65%',
-                            labels: {
-                                show: true,
-                                total: {
-                                    show: true,
-                                    label: 'Total',
-                                    formatter: w => w.globals.seriesTotals.reduce((a, b) => a + b, 0)
-                                }
-                            }
-                        }
+        // 1) Evolución del neto pagado (área)
+        if (window.dashData.evolucionSeries.length) {
+            new ApexCharts(document.querySelector('#chartEvolucion'), {
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    fontFamily: 'inherit',
+                    toolbar: { show: false },
+                    zoom: { enabled: false }
+                },
+                series: [{ name: 'Neto pagado', data: window.dashData.evolucionSeries }],
+                xaxis: {
+                    categories: window.dashData.evolucionLabels,
+                    labels: { style: { fontSize: '11px' } }
+                },
+                colors: ['#3b82f6'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.45,
+                        opacityTo: 0.05
                     }
+                },
+                stroke: { curve: 'smooth', width: 2 },
+                dataLabels: { enabled: false },
+                yaxis: {
+                    labels: {
+                        formatter: v => 'Gs. ' + new Intl.NumberFormat('es-PY').format(Math.round(v / 1000000)) + 'M'
+                    }
+                },
+                grid: { borderColor: '#e5e7eb' },
+                tooltip: {
+                    y: { formatter: v => 'Gs. ' + new Intl.NumberFormat('es-PY').format(v) }
                 }
             }).render();
         }
 
-        // 2) Colaboradores por departamento (barra horizontal)
-        const deptoLabels = Object.keys(window.dashData.departamento);
-        const deptoSeries = Object.values(window.dashData.departamento).map(v => parseInt(v));
-
-        if (deptoSeries.length) {
-            new ApexCharts(document.querySelector('#chartDepartamento'), {
-                chart: { type: 'bar', height: 300, fontFamily: 'inherit', toolbar: { show: false } },
-                series: [{ name: 'Colaboradores', data: deptoSeries }],
-                xaxis: { categories: deptoLabels },
-                colors: ['#3b82f6'],
+        // 2) Ingresos vs Descuentos (barras agrupadas)
+        if (window.dashData.compLabels.length) {
+            new ApexCharts(document.querySelector('#chartComparativa'), {
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    fontFamily: 'inherit',
+                    toolbar: { show: false }
+                },
+                series: [
+                    { name: 'Ingresos',   data: window.dashData.compIngresos },
+                    { name: 'Descuentos', data: window.dashData.compDescuentos }
+                ],
+                xaxis: {
+                    categories: window.dashData.compLabels,
+                    labels: { style: { fontSize: '11px' } }
+                },
+                colors: ['#22c55e', '#ef4444'],
                 plotOptions: {
                     bar: {
-                        horizontal: true,
+                        horizontal: false,
                         borderRadius: 4,
-                        distributed: false,
-                        barHeight: '60%'
+                        columnWidth: '55%'
                     }
                 },
-                dataLabels: { enabled: true, style: { fontSize: '11px' } },
-                grid: { borderColor: '#e5e7eb' }
+                dataLabels: { enabled: false },
+                legend: { position: 'bottom' },
+                yaxis: {
+                    labels: {
+                        formatter: v => 'Gs. ' + new Intl.NumberFormat('es-PY').format(Math.round(v / 1000000)) + 'M'
+                    }
+                },
+                grid: { borderColor: '#e5e7eb' },
+                tooltip: {
+                    y: { formatter: v => 'Gs. ' + new Intl.NumberFormat('es-PY').format(v) }
+                }
             }).render();
         }
     }
