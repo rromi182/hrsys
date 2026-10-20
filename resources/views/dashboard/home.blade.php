@@ -14,8 +14,23 @@
                 </p>
             </div>
 
-            {{-- Widget de fecha y hora en vivo --}}
-            <div class="shrink-0">
+                        {{-- Widgets de Información Rápida (Colaboradores + Reloj) --}}
+            <div class="shrink-0 flex items-center gap-3">
+                
+                {{-- Widget de Colaboradores Activos --}}
+                <div class="flex items-center gap-3 px-4 py-2 rounded-md bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20">
+                    <i data-lucide="users" class="size-5 text-green-600 dark:text-green-400"></i>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-green-700 dark:text-green-400">
+                            {{ $totalEmpleadosActivos }} Colaboradores
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-zink-200">
+                            {{ $nuevosIngresos }} nuevos este mes
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Widget de fecha y hora en vivo --}}
                 <div class="flex items-center gap-3 px-4 py-2 rounded-md bg-custom-50 dark:bg-custom-500/10 border border-custom-100 dark:border-custom-500/20">
                     <i data-lucide="calendar-clock" class="size-5 text-custom-500"></i>
                     <div class="text-right">
@@ -27,13 +42,14 @@
                         </p>
                     </div>
                 </div>
+
             </div>
         </div>
 
         {{-- ============ KPI CARDS FINANCIERAS ============ --}}
         <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
 
-            {{-- 1 Neto a pagar del mes --}}
+            {{-- 1) Neto a pagar (lo que recibe el colaborador) --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
@@ -46,18 +62,21 @@
                         </div>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
-                        <span class="text-green-500">↗ Gs. {{ number_format($totalIngresosMes, 0, ',', '.') }}</span> ingresos ·
-                        <span class="text-red-500">↘ Gs. {{ number_format($totalDescuentosMes, 0, ',', '.') }}</span> descuentos
+                        Bruto devengado: <span class="font-semibold">Gs. {{ number_format($totalDevengado, 0, ',', '.') }}</span><br>
+                        − IPS Colaborador: <span class="font-semibold text-purple-500">Gs. {{ number_format($ipsTrabajador, 0, ',', '.') }}</span>
+                        @if($otrosDescuentos > 0)
+                            · − Vales y Otros: <span class="font-semibold text-red-500">Gs. {{ number_format($otrosDescuentos, 0, ',', '.') }}</span>
+                        @endif
                     </p>
                 </div>
             </div>
 
-            {{-- 2 Liquidaciones pendientes de pago --}}
+            {{-- 2) Liquidaciones pendientes de pago --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Pendientes de Pago</p>
+                            <p class="text-slate-500 dark:text-zink-200">Liquidaciones Pendientes</p>
                             <h5 class="mt-2 text-2xl font-bold">{{ $totalPendienteCount }}</h5>
                         </div>
                         <div class="flex items-center justify-center w-12 h-12 text-amber-500 bg-amber-100 rounded-full dark:bg-amber-500/20">
@@ -70,39 +89,41 @@
                 </div>
             </div>
 
-            {{-- 3 Aportes IPS del mes --}}
+            {{-- 3) Aportes IPS trabajador + empleador --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Aportes IPS ({{ now()->translatedFormat('F') }})</p>
-                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($totalIpsMes, 0, ',', '.') }}</h5>
+                            <p class="text-slate-500 dark:text-zink-200">Total Aporte IPS ({{ now()->translatedFormat('F') }})</p>
+                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($ipsTrabajador + $ipsEmpleador, 0, ',', '.') }}</h5>
                         </div>
-                        <div class="flex items-center justify-center w-12 h-12 text-purple-500 bg-purple-100 rounded-full dark:bg-purple-500/20">
-                            <i data-lucide="shield-check" class="size-6"></i>
-                        </div>
+                        <div class="flex items-center justify-center w-12 h-12 text-emerald-500 bg-emerald-100 rounded-full dark:bg-emerald-500/20">
+                <i data-lucide="shield-plus" class="size-6"></i>
+            </div>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
-                        Costo promedio/colaborador: <span class="font-semibold">Gs. {{ number_format($costoPromedio, 0, ',', '.') }}</span>
+                        Colaborador ({{ $pctIpsTrabajador }}%):
+                        <span class="font-semibold">Gs. {{ number_format($ipsTrabajador, 0, ',', '.') }}</span><br>
+                        Empleador ({{ $pctIpsEmpleador }}%):
+                        <span class="font-semibold text-purple-500">Gs. {{ number_format($ipsEmpleador, 0, ',', '.') }}</span>
                     </p>
                 </div>
             </div>
 
-            {{-- 4) Movimientos del mes --}}
+            {{-- 4) Costo total empresa --}}
             <div class="card">
                 <div class="card-body">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-500 dark:text-zink-200">Vales / Adelantos ({{ now()->translatedFormat('F') }})</p>
-                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($valesMes, 0, ',', '.') }}</h5>
+                            <p class="text-slate-500 dark:text-zink-200">Costo Total Empresa ({{ now()->translatedFormat('F') }})</p>
+                            <h5 class="mt-2 text-2xl font-bold">Gs. {{ number_format($costoTotalEmpresa, 0, ',', '.') }}</h5>
                         </div>
-                        <div class="flex items-center justify-center w-12 h-12 text-red-500 bg-red-100 rounded-full dark:bg-red-500/20">
-                            <i data-lucide="hand-coins" class="size-6"></i>
+                        <div class="flex items-center justify-center w-12 h-12 text-amber-500 bg-amber-100 rounded-full dark:bg-amber-500/20">
+                            <i data-lucide="building-2" class="size-6"></i>
                         </div>
                     </div>
                     <p class="mt-3 text-sm text-slate-500 dark:text-zink-200">
-                        Extras: <span class="text-green-500">+ Gs. {{ number_format($extrasMes, 0, ',', '.') }}</span> ·
-                        Desc. por inasistencias: <span class="text-red-500">Gs. {{ number_format($inasistenciasMes, 0, ',', '.') }}</span>
+                        Bruto + aportes patronales · Costo prom./colab: <span class="font-semibold">Gs. {{ number_format($costoPromedio, 0, ',', '.') }}</span>
                     </p>
                 </div>
             </div>
@@ -119,10 +140,10 @@
                 </div>
             </div>
 
-            {{-- Gráfico 2: Ingresos vs Descuentos --}}
+            {{-- Gráfico 2: Devengado vs Descuentos --}}
             <div class="card">
                 <div class="card-body">
-                    <h6 class="text-15 mb-4">Ingresos vs Descuentos</h6>
+                    <h6 class="text-15 mb-4">Devengado vs Descuentos</h6>
                     <div id="chartComparativa" style="min-height: 300px;"></div>
                 </div>
             </div>
@@ -312,7 +333,7 @@ $(document).ready(function () {
             }).render();
         }
 
-        // 2) Ingresos vs Descuentos (barras agrupadas)
+        // 2) Devengado vs Descuentos (barras agrupadas)
         if (window.dashData.compLabels.length) {
             new ApexCharts(document.querySelector('#chartComparativa'), {
                 chart: {
@@ -322,7 +343,7 @@ $(document).ready(function () {
                     toolbar: { show: false }
                 },
                 series: [
-                    { name: 'Ingresos',   data: window.dashData.compIngresos },
+                    { name: 'Devengado',  data: window.dashData.compIngresos },
                     { name: 'Descuentos', data: window.dashData.compDescuentos }
                 ],
                 xaxis: {

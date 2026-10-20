@@ -23,6 +23,7 @@ class HomeController extends Controller
         $salarioPromedio       = Empleado::where('estado', 'activo')->avg('salario_base') ?? 0;
 
         $nuevosIngresos = Empleado::whereMonth('fecha_ingreso', now()->month)
+            ->where('estado', 'activo') 
             ->whereYear('fecha_ingreso', now()->year)
             ->count();
 
@@ -41,6 +42,7 @@ class HomeController extends Controller
             ->toArray();
 
         $empleados = Empleado::with(['cargo', 'departamento'])
+         ->where('estado', 'activo')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
@@ -51,43 +53,46 @@ class HomeController extends Controller
         $mes       = $ahora->month;
         $empresaId = 1;
 
-        // --- 1) Ingresos y descuentos del mes (base: movimientos activos) ---
+        // Base: movimientos activos del mes
         $movMesBase = MovimientoNomina::where('empresa_id', $empresaId)
             ->where('anio', $anio)
             ->where('mes', $mes)
             ->where('estado', 'activo');
 
-        // Ingresos = sueldo + extra (todos los es_ingreso = true)
-        $totalIngresosMes = (int) (clone $movMesBase)
+        // Devengado bruto = sueldo + extra (todos es_ingreso = true)
+        $totalDevengado = (int) (clone $movMesBase)
             ->where('es_ingreso', true)
             ->sum('monto');
 
-        // Descuentos = vale + ausencia + llegada_tardia + otros (es_ingreso = false)
-        $totalDescuentosMes = (int) (clone $movMesBase)
+        // Otros descuentos al trabajador (sin IPS)
+        $otrosDescuentos = (int) (clone $movMesBase)
             ->where('es_ingreso', false)
             ->sum('monto');
 
-        // --- 2) Base IPS: solo sueldo + extra ---
+        // Base IPS = sueldo + extra SOLO de empleados afiliados
         $baseIps = (int) (clone $movMesBase)
+            ->whereHas('empleado', function($q) {
+                $q->where('afiliado_ips', true);
+            })
             ->where('es_ingreso', true)
             ->whereIn('tipo_movimiento', ['sueldo', 'extra'])
             ->sum('monto');
 
-        // --- 3) IPS según parámetro del período ---
-        $parametro     = ParametroIps::paraPeriodo($empresaId, $anio, $mes);
-        $porcentajeIps = (float) $parametro->aporte_empleado;   // 9.00 por defecto
-        $totalIpsMes   = (int) round($baseIps * ($porcentajeIps / 100));
+        // Parámetros IPS del período
+        $parametroIps     = ParametroIps::paraPeriodo($empresaId, $anio, $mes);
+        $pctIpsTrabajador = (float) $parametroIps->aporte_empleado;   // 9.00
+        $pctIpsEmpleador  = (float) $parametroIps->aporte_empleador;  // 16.50
 
-        // --- 4) Neto a pagar del mes ---
-        $totalNetoMes = $totalIngresosMes - $totalDescuentosMes - $totalIpsMes;
+        $ipsTrabajador = (int) round($baseIps * ($pctIpsTrabajador / 100));
+        $ipsEmpleador  = (int) round($baseIps * ($pctIpsEmpleador / 100));
 
-        // --- 5) % de descuento sobre bruto ---
-        $baseDevengado  = $totalNetoMes + $totalDescuentosMes;
-        $porcentajeDesc = $baseDevengado > 0
-            ? round(($totalDescuentosMes / $baseDevengado) * 100, 1)
-            : 0;
+        // Neto a pagar = devengado − IPS trabajador − otros descuentos
+        $totalNetoMes = $totalDevengado - $ipsTrabajador - $otrosDescuentos;
 
-        // --- 6) Movimientos específicos para cards ---
+        // Costo total para la empresa = devengado + IPS empleador
+        $costoTotalEmpresa = $totalDevengado + $ipsEmpleador;
+
+        // Movimientos específicos para cards
         $extrasMes = (int) (clone $movMesBase)
             ->where('es_ingreso', true)
             ->where('tipo_movimiento', 'extra')
@@ -101,8 +106,12 @@ class HomeController extends Controller
             ->whereIn('tipo_movimiento', ['ausencia', 'llegada_tardia'])
             ->sum('monto');
 
+        // Costo promedio por colaborador (sobre el neto)
+        $costoPromedio = $totalEmpleadosActivos > 0
+            ? (int) round($totalNetoMes / $totalEmpleadosActivos)
+            : 0;
+
         // ============ PENDIENTES DE PAGO ============
-        // Excluye anuladas. Pendiente = sin fecha_pago y estado != anulado.
         $pendientesQuery = LiquidacionSalarial::where('empresa_id', $empresaId)
             ->where('periodo_anio', $anio)
             ->where('periodo_mes', $mes)
@@ -112,16 +121,11 @@ class HomeController extends Controller
         $totalPendienteCount = (clone $pendientesQuery)->count();
         $totalPendienteMonto = (int) (clone $pendientesQuery)->sum('total_neto');
 
-        // ============ COSTO PROMEDIO ============
-        $costoPromedio = $totalEmpleadosActivos > 0
-            ? (int) round($totalNetoMes / $totalEmpleadosActivos)
-            : 0;
-
         // ============ EVOLUCIÓN 6 MESES (neto calculado) ============
         $evolucionLabels = [];
         $evolucionSeries = [];
 
-        foreach (range(5, 0) as $i) {
+                foreach (range(5, 0) as $i) {
             $f = $ahora->copy()->subMonths($i);
 
             $ing = (int) MovimientoNomina::where('empresa_id', $empresaId)
@@ -134,24 +138,27 @@ class HomeController extends Controller
                 ->where('estado', 'activo')->where('es_ingreso', false)
                 ->sum('monto');
 
-            $baseIps = (int) MovimientoNomina::where('empresa_id', $empresaId)
+            // AGREGADO: whereHas empleado afiliado_ips
+            $baseIpsMes = (int) MovimientoNomina::where('empresa_id', $empresaId)
                 ->where('anio', $f->year)->where('mes', $f->month)
                 ->where('estado', 'activo')->where('es_ingreso', true)
+                ->whereHas('empleado', function($q) {
+                    $q->where('afiliado_ips', true);
+                })
                 ->whereIn('tipo_movimiento', ['sueldo', 'extra'])
                 ->sum('monto');
 
             $param = ParametroIps::paraPeriodo($empresaId, $f->year, $f->month);
-            $pct   = (float) $param->aporte_empleado;
-            $ips   = (int) round($baseIps * ($pct / 100));
+            $ips   = (int) round($baseIpsMes * ((float) $param->aporte_empleado / 100));
 
             $evolucionLabels[] = ucfirst($f->translatedFormat('M y'));
             $evolucionSeries[] = $ing - $des - $ips;
         }
 
-        // ============ COMPARATIVA INGRESOS VS DESCUENTOS ============
+        // ============ COMPARATIVA DEVENGADO VS DESCUENTOS ============
         $compLabels     = [];
-        $compIngresos   = [];
-        $compDescuentos = [];
+        $compIngresos   = [];   // acá va el DEVENGADO
+        $compDescuentos = [];   // acá van los descuentos
 
         foreach (range(5, 0) as $i) {
             $f = $ahora->copy()->subMonths($i);
@@ -179,17 +186,23 @@ class HomeController extends Controller
             'porEstado',
             'porDepartamento',
             'empleados',
+            // Financieros nuevos
+            'totalDevengado',
+            'otrosDescuentos',
+            'baseIps',
+            'pctIpsTrabajador',
+            'pctIpsEmpleador',
+            'ipsTrabajador',
+            'ipsEmpleador',
             'totalNetoMes',
-            'totalIngresosMes',
-            'totalDescuentosMes',
-            'totalIpsMes',
-            'porcentajeDesc',
+            'costoTotalEmpresa',
             'totalPendienteCount',
             'totalPendienteMonto',
             'extrasMes',
             'valesMes',
             'inasistenciasMes',
             'costoPromedio',
+            // Gráficos
             'evolucionLabels',
             'evolucionSeries',
             'compLabels',

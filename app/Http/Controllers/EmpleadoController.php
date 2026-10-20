@@ -102,6 +102,10 @@ class EmpleadoController extends Controller
         $data = $this->validar($request);
         $data = $this->normalizarMayusculas($data);
 
+        // Normalizar flags booleanos (vienen como "0"/"1" del hidden+checkbox)
+        $data['afiliado_ips'] = $request->has('afiliado_ips') && $request->input('afiliado_ips') == '1' ? 1 : 0;
+        $data['prueba_finalizada'] = $request->has('prueba_finalizada') && $request->input('prueba_finalizada') == '1' ? 1 : 0;
+
         // Unicidad compuesta: (empresa_id, codigo_empleado)
         $existe = Empleado::where('empresa_id', $data['empresa_id'])
             ->where('codigo_empleado', $data['codigo_empleado'])
@@ -142,6 +146,9 @@ class EmpleadoController extends Controller
     {
         $data = $this->validar($request, $empleado->id);
         $data = $this->normalizarMayusculas($data);
+
+        $data['afiliado_ips']      = $request->boolean('afiliado_ips');
+        $data['prueba_finalizada'] = $request->boolean('prueba_finalizada');
 
         // Unicidad compuesta: (empresa_id, codigo_empleado) excluyendo el actual
         $existe = Empleado::where('empresa_id', $data['empresa_id'])
@@ -276,6 +283,9 @@ class EmpleadoController extends Controller
                         'estado'                  => strtolower($fila['estado'] ?? 'activo'),
                         'salario_base'            => (int) preg_replace('/\D/', '', (string)($fila['salario_base'] ?? 0)),
                         'numero_ips'              => $fila['numero_ips'] ?? null,
+                        'afiliado_ips'            => !empty($fila['numero_ips']), // si trae número, asumimos afiliado
+                        'fecha_afiliacion_ips'    => $this->fecha($fila['fecha_afiliacion_ips'] ?? null),
+                        'prueba_finalizada'       => filter_var($fila['prueba_finalizada'] ?? false, FILTER_VALIDATE_BOOLEAN),
                         'profesion'               => $fila['profesion'] ?? null,
                         'creado_por'              => auth()->id(),
                     ];
@@ -361,7 +371,10 @@ class EmpleadoController extends Controller
             'estado'                  => 'required|in:activo,vacaciones,licencia,suspendido,inactivo',
             'jefe_inmediato_id'       => 'nullable|exists:empleados,id',
             'salario_base'            => 'required|integer|min:0',
-            'numero_ips'              => 'nullable|string|max:20',
+            'numero_ips' => 'nullable|string|max:20',
+            'afiliado_ips'            => 'nullable|boolean',
+            'fecha_afiliacion_ips'    => 'nullable|date',
+            'prueba_finalizada'       => 'nullable|boolean',
             'profesion'               => 'nullable|string|max:100',
             'foto'                    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];

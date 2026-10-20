@@ -38,7 +38,12 @@ class GeneradorMovimientosNomina
         $omitidos = 0;
 
         foreach ($empleados as $empleado) {
-            foreach (MovimientoNomina::TIPOS_INGRESO as $tipo) {
+            // Si está en período de prueba, solo se le genera el sueldo (sin extra)
+            $tipos = $empleado->debeGenerarExtra()
+                ? MovimientoNomina::TIPOS_INGRESO
+                : ['sueldo'];
+
+            foreach ($tipos as $tipo) {
                 // Chequeo previo (fuera de transacción, rápido)
                 $yaExiste = MovimientoNomina::where('empleado_id', $empleado->id)
                     ->where('empresa_id', $empresaId)

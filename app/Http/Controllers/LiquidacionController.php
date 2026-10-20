@@ -29,7 +29,10 @@ class LiquidacionController extends Controller
             ->get();
 
         return view('HR.liquidacion.listado', compact(
-            'anio', 'mes', 'empresaId', 'empleados'
+            'anio',
+            'mes',
+            'empresaId',
+            'empleados'
         ));
     }
 
@@ -46,6 +49,7 @@ class LiquidacionController extends Controller
             ->where('empresa_id', $empresaId)
             ->where('periodo_anio', $anio)
             ->where('periodo_mes', $mes)
+             ->where('estado', '!=', 'anulado')
             ->orderBy('id', 'desc');
 
         if ($request->filled('empleado_id')) {
@@ -57,8 +61,8 @@ class LiquidacionController extends Controller
             $search = $request->search['value'];
             $query->whereHas('empleado', function ($q) use ($search) {
                 $q->where('nombres', 'like', "%{$search}%")
-                  ->orWhere('apellidos', 'like', "%{$search}%")
-                  ->orWhere('numero_documento', 'like', "%{$search}%");
+                    ->orWhere('apellidos', 'like', "%{$search}%")
+                    ->orWhere('numero_documento', 'like', "%{$search}%");
             });
         }
 
@@ -144,10 +148,15 @@ class LiquidacionController extends Controller
             $totalIngresos   = $movimientos->where('es_ingreso', true)->sum('monto');
             $totalDescuentos = $movimientos->where('es_ingreso', false)->sum('monto');
 
-            // 2) IPS
-            $parametro     = ParametroIps::paraPeriodo($empresaId, $anio, $mes);
-            $porcentajeIps = (float) $parametro->aporte_empleado;
-            $aporteIps     = (int) round($totalIngresos * ($porcentajeIps / 100));
+            // 2) IPS — solo si el empleado está afiliado
+            $aporteIps     = 0;
+            $porcentajeIps = 0;
+
+            if ($empleado->debeAplicarIps()) {
+                $parametro     = ParametroIps::paraPeriodo($empresaId, $anio, $mes);
+                $porcentajeIps = (float) $parametro->aporte_empleado;
+                $aporteIps     = (int) round($totalIngresos * ($porcentajeIps / 100));
+            }
 
             $totalNeto = $totalIngresos - $totalDescuentos - $aporteIps;
 
@@ -182,21 +191,22 @@ class LiquidacionController extends Controller
                 ]);
             }
 
-            // 5) Detalle del aporte IPS
-            LiquidacionSalarialDet::create([
-                'liquidacion_id'   => $liq->id,
-                'concepto_id'      => $mapaConceptos['ips_empleado'] ?? 0,
-                'tipo'             => 'aporte',
-                'monto'            => $aporteIps,
-                'cantidad'         => $porcentajeIps,
-                'formula_aplicada' => 'IPS ' . $porcentajeIps . '%',
-            ]);
+            // 5) Detalle del aporte IPS - solo si hay aporte
+            if ($aporteIps > 0) {
+                LiquidacionSalarialDet::create([
+                    'liquidacion_id'   => $liq->id,
+                    'concepto_id'      => $mapaConceptos['ips_empleado'] ?? 0,
+                    'tipo'             => 'aporte',
+                    'monto'            => $aporteIps,
+                    'cantidad'         => $porcentajeIps,
+                    'formula_aplicada' => 'IPS ' . $porcentajeIps . '%',
+                ]);
+            }
 
             DB::commit();
 
             return redirect()->route('liquidacion.show', $liq->id)
                 ->with('success', 'Liquidación generada correctamente.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error al generar liquidación: ' . $e->getMessage());

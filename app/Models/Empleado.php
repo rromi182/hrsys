@@ -41,6 +41,10 @@ class Empleado extends Model
         'jefe_inmediato_id',
         'salario_base',
         'numero_ips',
+        'numero_ips',
+        'afiliado_ips',
+        'fecha_afiliacion_ips',
+        'prueba_finalizada',
         'profesion',
         'estado',
         'creado_por',
@@ -51,6 +55,9 @@ class Empleado extends Model
         'fecha_nacimiento' => 'date',
         'fecha_ingreso'    => 'date',
         'fecha_egreso'     => 'date',
+        'afiliado_ips'         => 'boolean',
+        'fecha_afiliacion_ips' => 'date',
+        'prueba_finalizada'    => 'boolean',
     ];
 
     public function getNombreCompletoAttribute(): string
@@ -105,5 +112,17 @@ class Empleado extends Model
     public function horario()
     {
         return $this->belongsTo(HorarioLaboral::class, 'horario_id');
+    }
+
+    /** ¿Se le debe calcular/descontar IPS en la liquidación? */
+    public function debeAplicarIps(): bool
+    {
+        return (bool) $this->afiliado_ips;
+    }
+
+    /** ¿Ya pasó el período de prueba y corresponde generar el extra? */
+    public function debeGenerarExtra(): bool
+    {
+        return (bool) $this->prueba_finalizada;
     }
 }

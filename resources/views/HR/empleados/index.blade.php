@@ -40,22 +40,22 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
                         </select>
                     </div>
                     <div class="xl:col-span-4">
-    <label class="inline-block mb-2 text-base font-medium">Cargo</label>
-    <select id="filtroCargo" class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 dark:text-zink-100 dark:bg-zink-700 w-full">
-        <option value="">Todos</option>
-        @foreach($cargos as $c)
-        <option>{{ $c->nombre }}</option>
-        @endforeach
-    </select>
-</div>
+                        <label class="inline-block mb-2 text-base font-medium">Cargo</label>
+                        <select id="filtroCargo" class="form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 dark:text-zink-100 dark:bg-zink-700 w-full">
+                            <option value="">Todos</option>
+                            @foreach($cargos as $c)
+                            <option>{{ $c->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="xl:col-span-4 flex items-end gap-2">
                         <button type="button" id="btnImportar" data-modal-target="modalImportar"
-                                class="text-white btn bg-purple-500 border-purple-500 hover:bg-purple-600 w-full">
+                            class="text-white btn bg-purple-500 border-purple-500 hover:bg-purple-600 w-full">
                             <i data-lucide="upload" class="inline-block size-4"></i>
                             <span class="align-middle">Importar</span>
                         </button>
                         <button type="button" id="btnNuevo" data-modal-target="modalEmpleado"
-                                class="text-white btn bg-custom-500 border-custom-500 hover:text-white hover:bg-custom-600 w-full">
+                            class="text-white btn bg-custom-500 border-custom-500 hover:text-white hover:bg-custom-600 w-full">
                             <i data-lucide="plus" class="inline-block size-4"></i>
                             <span class="align-middle">Nuevo Colaborador</span>
                         </button>
@@ -87,9 +87,9 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
                         <tr>
                             <td class="text-center">
                                 @if($e->foto)
-                                    <img src="{{ asset('assets/images/empleados/'.$e->foto) }}" class="rounded-full mx-auto" width="40" height="40" style="object-fit:cover;">
+                                <img src="{{ asset('assets/images/empleados/'.$e->foto) }}" class="rounded-full mx-auto" width="40" height="40" style="object-fit:cover;">
                                 @else
-                                    <span class="px-2 py-0.5 text-xs rounded border bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-500/20 dark:text-zink-200">N/A</span>
+                                <span class="px-2 py-0.5 text-xs rounded border bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-500/20 dark:text-zink-200">N/A</span>
                                 @endif
                             </td>
                             <td>{{ $e->numero_documento }}</td>
@@ -109,16 +109,16 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
                             <td class="text-center">
                                 <div class="flex gap-2 justify-center">
                                     <button class="inline-flex items-center justify-center rounded-md size-8 bg-slate-100 text-slate-500 hover:text-blue-500 hover:bg-blue-100 dark:bg-zink-600 dark:text-zink-200 dark:hover:bg-blue-500/20 dark:hover:text-blue-500"
-                                            onclick="verEmpleado({{ $e->id }})" title="Ver detalle">
+                                        onclick="verEmpleado({{ $e->id }})" title="Ver detalle">
                                         <i class="ri-eye-line"></i>
                                     </button>
                                     <button class="inline-flex items-center justify-center rounded-md size-8 bg-slate-100 text-slate-500 hover:text-custom-500 hover:bg-custom-100 dark:bg-zink-600 dark:text-zink-200 dark:hover:bg-custom-500/20 dark:hover:text-custom-500"
-                                            onclick="editarEmpleado({{ $e->id }})" title="Editar">
+                                        onclick="editarEmpleado({{ $e->id }})" title="Editar">
                                         <i class="ri-pencil-line"></i>
                                     </button>
                                     <button class="inline-flex items-center justify-center rounded-md size-8 bg-slate-100 text-slate-500 hover:text-red-500 hover:bg-red-100 dark:bg-zink-600 dark:text-zink-200 dark:hover:bg-red-500/20 dark:hover:text-red-500"
-                                            onclick="confirmarAnular({{ $e->id }}, '{{ addslashes($e->apellidos.', '.$e->nombres) }}')"
-                                            title="Anular" @if($e->estado === 'inactivo') disabled @endif>
+                                        onclick="confirmarAnular({{ $e->id }}, '{{ addslashes($e->apellidos.', '.$e->nombres) }}')"
+                                        title="Anular" @if($e->estado === 'inactivo') disabled @endif>
                                         <i class="ri-close-circle-line"></i>
                                     </button>
                                 </div>
@@ -137,13 +137,13 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
 {{-- ========================================================= --}}
 <div style="display:none">
     <button type="button" id="__openEmpleado" data-modal-target="modalEmpleado"></button>
-    <button type="button" id="__openAnular"   data-modal-target="modalAnular"></button>
-    <button type="button" id="__openVer"      data-modal-target="modalVer"></button>
+    <button type="button" id="__openAnular" data-modal-target="modalAnular"></button>
+    <button type="button" id="__openVer" data-modal-target="modalVer"></button>
 </div>
 
 {{-- Modal Crear/Editar --}}
 <div id="modalEmpleado" modal-center="" class="fixed flex flex-col hidden transition-all duration-300 ease-in-out left-2/4 z-drawer -translate-x-2/4 -translate-y-2/4 show">
-    <div class="w-screen md:w-[40rem] bg-white shadow rounded-md dark:bg-zink-600">
+    <div class="w-screen md:w-[50rem] bg-white shadow rounded-md dark:bg-zink-600">
         <div class="flex items-center justify-between p-4 border-b dark:border-zink-500">
             <h5 class="text-16" id="modalTitulo">Nuevo Colaborador</h5>
             <button data-modal-close="modalEmpleado" class="transition-all duration-200 ease-linear text-slate-400 hover:text-red-500">
@@ -321,6 +321,34 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
                         <label class="inline-block mb-2 text-base font-medium">Nro. IPS</label>
                         <input type="text" name="numero_ips" value="{{ old('numero_ips') }}" class="form-input border-slate-200 dark:border-zink-500 dark:text-zink-100 dark:bg-zink-700 w-full">
                     </div>
+                                        {{-- Afiliación IPS --}}
+                    <div class="xl:col-span-3">
+                        <label class="inline-block mb-2 text-base font-medium">Afiliado al IPS</label>
+                        <div class="flex items-center h-[38px]">
+                            <input type="hidden" name="afiliado_ips" value="0">
+                            <input class="form-checkbox border-slate-200 dark:border-zink-500 rounded size-4 text-custom-500" type="checkbox" name="afiliado_ips" value="1" id="afiliado_ips">
+                            <label class="ml-2 text-sm text-slate-500 dark:text-zink-200" for="afiliado_ips">Sí, descontar IPS</label>
+                        </div>
+                        @error('afiliado_ips') <small class="text-red-500">{{ $message }}</small> @enderror
+                    </div>
+
+                    {{-- Fecha de afiliación --}}
+                    <div class="xl:col-span-3">
+                        <label class="inline-block mb-2 text-base font-medium" for="fecha_afiliacion_ips">Fecha afil. IPS</label>
+                        <input type="date" name="fecha_afiliacion_ips" id="fecha_afiliacion_ips" class="form-input border-slate-200 dark:border-zink-500 dark:text-zink-100 dark:bg-zink-700 w-full" value="{{ old('fecha_afiliacion_ips') }}">
+                        @error('fecha_afiliacion_ips') <small class="text-red-500">{{ $message }}</small> @enderror
+                    </div>
+
+                    {{-- Período de prueba finalizado --}}
+                    <div class="xl:col-span-3">
+                        <label class="inline-block mb-2 text-base font-medium">Fin de Prueba</label>
+                        <div class="flex items-center h-[38px]">
+                            <input type="hidden" name="prueba_finalizada" value="0">
+                            <input class="form-checkbox border-slate-200 dark:border-zink-500 rounded size-4 text-custom-500" type="checkbox" name="prueba_finalizada" value="1" id="prueba_finalizada">
+                            <label class="ml-2 text-sm text-slate-500 dark:text-zink-200" for="prueba_finalizada">Habilitar extra</label>
+                        </div>
+                        @error('prueba_finalizada') <small class="text-red-500">{{ $message }}</small> @enderror
+                    </div>
                     <div class="xl:col-span-3">
                         <label class="inline-block mb-2 text-base font-medium">Profesión</label>
                         <input type="text" name="profesion" value="{{ old('profesion') }}" class="form-input border-slate-200 dark:border-zink-500 dark:text-zink-100 dark:bg-zink-700 w-full">
@@ -416,242 +444,302 @@ $actionForm = ($huboError && $modoEditar) ? url('hr/empleados/'.old('empleado_id
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-$(document).ready(function () {
-    const rutaBase      = "{{ url('hr/empleados') }}";
-    const rutaImportar  = "{{ route('empleados.importar') }}";
-    const token         = "{{ csrf_token() }}";
-    const codigoInicial = @json($siguienteCodigo ?? 'EMP001');
+    $(document).ready(function() {
+        const rutaBase = "{{ url('hr/empleados') }}";
+        const rutaImportar = "{{ route('empleados.importar') }}";
+        const token = "{{ csrf_token() }}";
+        const codigoInicial = @json($siguienteCodigo ?? 'EMP001');
 
-    const F = {
-        ok:   (window.flasher && flasher.success) ? flasher.success.bind(flasher) : (m) => alert(m),
-        warn: (window.flasher && flasher.warning) ? flasher.warning.bind(flasher) : (m) => alert(m),
-        err:  (window.flasher && flasher.error)   ? flasher.error.bind(flasher)   : (m) => alert(m),
-        info: (window.flasher && flasher.info)    ? flasher.info.bind(flasher)    : (m) => console.log(m),
-    };
-
-    /* ============ DataTable ============ */
-    const tabla = $('#tablaEmpleados').DataTable({
-        pageLength: 25,
-        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-        order: [[2, 'asc']],
-        language: {
-            processing: "Procesando...",
-            search: "Buscar:",
-            lengthMenu: "Mostrar _MENU_ registros",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-            infoEmpty: "Mostrando 0 a 0 de 0 registros",
-            infoFiltered: "(filtrado de _MAX_ registros totales)",
-            loadingRecords: "Cargando...",
-            zeroRecords: "No se encontraron registros",
-            emptyTable: "No hay datos disponibles",
-            paginate: {
-                first: "Primero",
-                previous: '<i class="ri-arrow-left-s-line"></i>',
-                next: '<i class="ri-arrow-right-s-line"></i>',
-                last: "Último"
-            }
-        },
-        dom: "Bfrtip",
-        buttons: [
-            { extend: 'excelHtml5', text: 'Excel', className: 'btn bg-green-500 text-white hover:bg-green-600',
-              title: 'Listado de Colaboradores', exportOptions: { columns: [1, 2, 3, 4] } },
-            { extend: 'pdfHtml5', text: 'PDF', className: 'btn bg-red-500 text-white hover:bg-red-600',
-              title: 'Listado de Colaboradores', orientation: 'landscape', pageSize: 'A4',
-              exportOptions: { columns: [1, 2, 3, 4] } },
-            { extend: 'print', text: 'Imprimir', className: 'btn bg-slate-500 text-white hover:bg-slate-600',
-              title: 'Listado de Colaboradores', exportOptions: { columns: [1, 2, 3, 4] } }
-        ],
-        responsive: true
-    });
-
-    /* Filtros */
-    $('#filtroEstado').on('change', function () {
-        const val = $(this).val();
-        tabla.column(4).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-    });
-
-$('#filtroCargo').on('change', function () {
-    const val = $(this).val();
-    // Columna Cargo = índice 3
-    tabla.column(3).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-});
-
-    /* ============ Abrir/cerrar modales (mismo patrón que Liquidaciones) ============ */
-const setModal = (id, open) => {
-    // Mapeo de modales a botones ocultos del theme
-    const triggerMap = {
-        modalEmpleado: '__openEmpleado',
-        modalAnular:   '__openAnular',
-        modalVer:      '__openVer',
-        modalImportar: 'btnImportar',
-    };
-
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    if (open) {
-        // Si existe botón oculto con data-modal-target, hacer click en él
-        // así el theme hace su trabajo (backdrop, body lock, etc.)
-        const trigger = document.getElementById(triggerMap[id]);
-        if (trigger && trigger.hasAttribute('data-modal-target')) {
-            trigger.click();
-            return;
-        }
-        // Fallback: abrir manualmente
-        el.classList.remove('hidden');
-        el.classList.add('show', 'flex');
-    } else {
-        // Cerrar: buscar botón con data-modal-close y hacer click
-        const closeBtn = el.querySelector('[data-modal-close="' + id + '"]');
-        if (closeBtn) { closeBtn.click(); return; }
-
-        // Fallback: cerrar a mano + limpiar backdrop
-        el.classList.add('hidden');
-        el.classList.remove('show', 'flex');
-        document.querySelectorAll('.modal-backdrop, [data-modal-backdrop], .backdrop').forEach(x => x.remove());
-        document.body.classList.remove('overflow-hidden', 'modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-    }
-    if (window.lucide) lucide.createIcons();
-};
-
-window.abrirModal  = (id) => setModal(id, true);
-window.cerrarModal = (id) => setModal(id, false);
-
-    /* ============ Helpers ============ */
-    const cargarDeptosResidencia = () => {
-        const dl = document.getElementById('listaDeptosRes');
-        if (!dl) return;
-        const deptos = ['Asunción','Central','Alto Paraná','Alto Paraguay','Amambay','Boquerón','Caaguazú','Caazapá','Canindeyú','Concepción','Cordillera','Guairá','Itapúa','Misiones','Ñeembucú','Paraguarí','Presidente Hayes','San Pedro'];
-        dl.innerHTML = deptos.map(d => `<option value="${d}">`).join('');
-    };
-
-    const cargarCiudadesResidencia = () => {
-        const dep = document.getElementById('departamento_residencia');
-        const dl  = document.getElementById('listaCiudadesRes');
-        if (!dep || !dl) return;
-        const mapa = {
-            'Asunción':['Asunción'],
-            'Central':['Asunción','San Lorenzo','Fernando de la Mora','Luque','Capiatá','Lambaré','Ñemby','Itauguá','Mariano Roque Alonso','Villa Elisa','Guarambaré','Itá','Ypané','Limpio','San Antonio','Areguá'],
-            'Alto Paraná':['Ciudad del Este','Hernandarias','Presidente Franco','Minga Guazú','Santa Rita','Naranjal'],
-            'Itapúa':['Encarnación','Hohenau','Obligado','San Juan del Paraná','Tomás Romero Pereira'],
-            'Misiones':['San Ignacio','San Juan Bautista','Santiago','Ayolas','San Miguel'],
-            'Paraguarí':['Paraguarí','Carapeguá','Yaguarón','Pirayú','Quiindy'],
-            'Cordillera':['Caacupé','Villarrica','Piribebuy','Tobatí','Valenzuela'],
-            'Caaguazú':['Coronel Oviedo','Caaguazú','Repatriación','J. Eulogio Estigarribia'],
+        const F = {
+            ok: (window.flasher && flasher.success) ? flasher.success.bind(flasher) : (m) => alert(m),
+            warn: (window.flasher && flasher.warning) ? flasher.warning.bind(flasher) : (m) => alert(m),
+            err: (window.flasher && flasher.error) ? flasher.error.bind(flasher) : (m) => alert(m),
+            info: (window.flasher && flasher.info) ? flasher.info.bind(flasher) : (m) => console.log(m),
         };
-        dl.innerHTML = (mapa[dep.value.trim()] || []).map(c => `<option value="${c}">`).join('');
-    };
 
-    const depRes = document.getElementById('departamento_residencia');
-    if (depRes) depRes.addEventListener('change', cargarCiudadesResidencia);
-
-    const fotoInput = document.getElementById('foto');
-    if (fotoInput) {
-        fotoInput.addEventListener('change', function () {
-            const prev = document.getElementById('fotoPreview');
-            if (prev && this.files && this.files[0]) {
-                prev.src = URL.createObjectURL(this.files[0]);
-                prev.classList.remove('hidden');
-            }
+        /* ============ DataTable ============ */
+        const tabla = $('#tablaEmpleados').DataTable({
+            pageLength: 25,
+            lengthMenu: [
+                [10, 25, 50, 100],
+                [10, 25, 50, 100]
+            ],
+            order: [
+                [2, 'asc']
+            ],
+            language: {
+                processing: "Procesando...",
+                search: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                loadingRecords: "Cargando...",
+                zeroRecords: "No se encontraron registros",
+                emptyTable: "No hay datos disponibles",
+                paginate: {
+                    first: "Primero",
+                    previous: '<i class="ri-arrow-left-s-line"></i>',
+                    next: '<i class="ri-arrow-right-s-line"></i>',
+                    last: "Último"
+                }
+            },
+            dom: "Bfrtip",
+            buttons: [{
+                    extend: 'excelHtml5',
+                    text: 'Excel',
+                    className: 'btn bg-green-500 text-white hover:bg-green-600',
+                    title: 'Listado de Colaboradores',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4]
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: 'PDF',
+                    className: 'btn bg-red-500 text-white hover:bg-red-600',
+                    title: 'Listado de Colaboradores',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4]
+                    }
+                },
+                {
+                    extend: 'print',
+                    text: 'Imprimir',
+                    className: 'btn bg-slate-500 text-white hover:bg-slate-600',
+                    title: 'Listado de Colaboradores',
+                    exportOptions: {
+                        columns: [1, 2, 3, 4]
+                    }
+                }
+            ],
+            responsive: true
         });
-    }
 
-    /* ============ CRUD ============ */
-    window.nuevoEmpleado = function () {
-        const form = document.getElementById('formEmpleado');
-        if (!form) return;
-        form.reset();
-        document.getElementById('empleado_id').value = '';
-        document.getElementById('methodField').innerHTML = '';
-        form.action = "{{ route('empleados.store') }}";
-        form.querySelector('[name=modo]').value = 'crear';
-        document.getElementById('modalTitulo').textContent = 'Nuevo Colaborador';
-        const prev = document.getElementById('fotoPreview');
-        if (prev) prev.classList.add('hidden');
-        const cod = document.getElementById('codigo_empleado');
-        if (cod) cod.value = codigoInicial;
-        cargarDeptosResidencia();
-        cargarCiudadesResidencia();
-        abrirModal('modalEmpleado');
-    };
+        /* Filtros */
+        $('#filtroEstado').on('change', function() {
+            const val = $(this).val();
+            tabla.column(4).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+        });
 
-    window.editarEmpleado = function (id) {
-        fetch(`${rutaBase}/${id}/ver`, {
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-        }).then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.json();
-        }).then(data => {
-            const form = document.getElementById('formEmpleado');
-            form.reset();
-            const set = (name, val) => {
-                const el = form.querySelector(`[name="${name}"]`);
-                if (el && val !== null && val !== undefined) el.value = val;
+        $('#filtroCargo').on('change', function() {
+            const val = $(this).val();
+            // Columna Cargo = índice 3
+            tabla.column(3).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+        });
+
+        /* ============ Abrir/cerrar modales (mismo patrón que Liquidaciones) ============ */
+        const setModal = (id, open) => {
+            // Mapeo de modales a botones ocultos del theme
+            const triggerMap = {
+                modalEmpleado: '__openEmpleado',
+                modalAnular: '__openAnular',
+                modalVer: '__openVer',
+                modalImportar: 'btnImportar',
             };
-            const soloFecha = v => v ? String(v).substring(0, 10) : '';
-            set('nombres', data.nombres); set('apellidos', data.apellidos);
-            set('tipo_documento', data.tipo_documento); set('numero_documento', data.numero_documento);
-            set('fecha_nacimiento', soloFecha(data.fecha_nacimiento));
-            set('sexo', data.sexo); set('estado_civil', data.estado_civil);
-            set('nacionalidad', data.nacionalidad);
-            set('telefono', data.telefono); set('correo', data.correo); set('direccion', data.direccion);
-            set('departamento_residencia', data.departamento_residencia);
-            set('ciudad_residencia', data.ciudad_residencia);
-            set('codigo_empleado', data.codigo_empleado);
-            set('empresa_id', data.empresa_id); set('sucursal_id', data.sucursal_id);
-            set('departamento_id', data.departamento_id); set('cargo_id', data.cargo_id);
-            set('tipo_contrato_id', data.tipo_contrato_id); set('horario_id', data.horario_id);
-            set('jefe_inmediato_id', data.jefe_inmediato_id);
-            set('fecha_ingreso', soloFecha(data.fecha_ingreso));
-            set('fecha_egreso', soloFecha(data.fecha_egreso));
-            set('salario_base', data.salario_base);
-            set('numero_ips', data.numero_ips); set('profesion', data.profesion);
-            set('estado', data.estado);
 
-            document.getElementById('empleado_id').value = data.id;
-            document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
-            form.action = `${rutaBase}/${data.id}/actualizar`;
-            form.querySelector('[name=modo]').value = 'editar';
-            document.getElementById('modalTitulo').textContent = 'Editar Colaborador';
+            const el = document.getElementById(id);
+            if (!el) return;
 
-            const prev = document.getElementById('fotoPreview');
-            if (prev) {
-                if (data.foto) { prev.src = `/assets/images/empleados/${data.foto}`; prev.classList.remove('hidden'); }
-                else prev.classList.add('hidden');
+            if (open) {
+                // Si existe botón oculto con data-modal-target, hacer click en él
+                // así el theme hace su trabajo (backdrop, body lock, etc.)
+                const trigger = document.getElementById(triggerMap[id]);
+                if (trigger && trigger.hasAttribute('data-modal-target')) {
+                    trigger.click();
+                    return;
+                }
+                // Fallback: abrir manualmente
+                el.classList.remove('hidden');
+                el.classList.add('show', 'flex');
+            } else {
+                // Cerrar: buscar botón con data-modal-close y hacer click
+                const closeBtn = el.querySelector('[data-modal-close="' + id + '"]');
+                if (closeBtn) {
+                    closeBtn.click();
+                    return;
+                }
+
+                // Fallback: cerrar a mano + limpiar backdrop
+                el.classList.add('hidden');
+                el.classList.remove('show', 'flex');
+                document.querySelectorAll('.modal-backdrop, [data-modal-backdrop], .backdrop').forEach(x => x.remove());
+                document.body.classList.remove('overflow-hidden', 'modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
             }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.abrirModal = (id) => setModal(id, true);
+        window.cerrarModal = (id) => setModal(id, false);
+
+        /* ============ Helpers ============ */
+        const cargarDeptosResidencia = () => {
+            const dl = document.getElementById('listaDeptosRes');
+            if (!dl) return;
+            const deptos = ['Asunción', 'Central', 'Alto Paraná', 'Alto Paraguay', 'Amambay', 'Boquerón', 'Caaguazú', 'Caazapá', 'Canindeyú', 'Concepción', 'Cordillera', 'Guairá', 'Itapúa', 'Misiones', 'Ñeembucú', 'Paraguarí', 'Presidente Hayes', 'San Pedro'];
+            dl.innerHTML = deptos.map(d => `<option value="${d}">`).join('');
+        };
+
+        const cargarCiudadesResidencia = () => {
+            const dep = document.getElementById('departamento_residencia');
+            const dl = document.getElementById('listaCiudadesRes');
+            if (!dep || !dl) return;
+            const mapa = {
+                'Asunción': ['Asunción'],
+                'Central': ['Asunción', 'San Lorenzo', 'Fernando de la Mora', 'Luque', 'Capiatá', 'Lambaré', 'Ñemby', 'Itauguá', 'Mariano Roque Alonso', 'Villa Elisa', 'Guarambaré', 'Itá', 'Ypané', 'Limpio', 'San Antonio', 'Areguá'],
+                'Alto Paraná': ['Ciudad del Este', 'Hernandarias', 'Presidente Franco', 'Minga Guazú', 'Santa Rita', 'Naranjal'],
+                'Itapúa': ['Encarnación', 'Hohenau', 'Obligado', 'San Juan del Paraná', 'Tomás Romero Pereira'],
+                'Misiones': ['San Ignacio', 'San Juan Bautista', 'Santiago', 'Ayolas', 'San Miguel'],
+                'Paraguarí': ['Paraguarí', 'Carapeguá', 'Yaguarón', 'Pirayú', 'Quiindy'],
+                'Cordillera': ['Caacupé', 'Villarrica', 'Piribebuy', 'Tobatí', 'Valenzuela'],
+                'Caaguazú': ['Coronel Oviedo', 'Caaguazú', 'Repatriación', 'J. Eulogio Estigarribia'],
+            };
+            dl.innerHTML = (mapa[dep.value.trim()] || []).map(c => `<option value="${c}">`).join('');
+        };
+
+        const depRes = document.getElementById('departamento_residencia');
+        if (depRes) depRes.addEventListener('change', cargarCiudadesResidencia);
+
+        const fotoInput = document.getElementById('foto');
+        if (fotoInput) {
+            fotoInput.addEventListener('change', function() {
+                const prev = document.getElementById('fotoPreview');
+                if (prev && this.files && this.files[0]) {
+                    prev.src = URL.createObjectURL(this.files[0]);
+                    prev.classList.remove('hidden');
+                }
+            });
+        }
+
+        /* ============ CRUD ============ */
+        window.nuevoEmpleado = function() {
+            const form = document.getElementById('formEmpleado');
+            if (!form) return;
+            form.reset();
+            document.getElementById('empleado_id').value = '';
+            document.getElementById('methodField').innerHTML = '';
+            form.action = "{{ route('empleados.store') }}";
+            form.querySelector('[name=modo]').value = 'crear';
+            document.getElementById('modalTitulo').textContent = 'Nuevo Colaborador';
+            const prev = document.getElementById('fotoPreview');
+            if (prev) prev.classList.add('hidden');
+            const cod = document.getElementById('codigo_empleado');
+            if (cod) cod.value = codigoInicial;
+            const chkAfiliado = document.getElementById('afiliado_ips');
+            if (chkAfiliado) chkAfiliado.checked = false;
+            const chkPrueba = document.getElementById('prueba_finalizada');
+            if (chkPrueba) chkPrueba.checked = false;
+            const fechaIps = document.getElementById('fecha_afiliacion_ips');
+            if (fechaIps) fechaIps.value = '';
             cargarDeptosResidencia();
             cargarCiudadesResidencia();
             abrirModal('modalEmpleado');
-        }).catch(err => {
-            console.error(err);
-            F.err('No se pudo cargar el colaborador.');
-        });
-    };
+        };
 
-    window.confirmarAnular = function (id, nombre) {
-        document.getElementById('nombreAnular').textContent = nombre;
-        document.getElementById('formAnular').action = `${rutaBase}/${id}/anular`;
-        abrirModal('modalAnular');
-    };
+        window.editarEmpleado = function(id) {
+            fetch(`${rutaBase}/${id}/ver`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).then(data => {
+                const form = document.getElementById('formEmpleado');
+                form.reset();
+                const set = (name, val) => {
+                    const el = form.querySelector(`[name="${name}"]`);
+                    if (el && val !== null && val !== undefined) el.value = val;
+                };
+                const soloFecha = v => v ? String(v).substring(0, 10) : '';
+                set('nombres', data.nombres);
+                set('apellidos', data.apellidos);
+                set('tipo_documento', data.tipo_documento);
+                set('numero_documento', data.numero_documento);
+                set('fecha_nacimiento', soloFecha(data.fecha_nacimiento));
+                set('sexo', data.sexo);
+                set('estado_civil', data.estado_civil);
+                set('nacionalidad', data.nacionalidad);
+                set('telefono', data.telefono);
+                set('correo', data.correo);
+                set('direccion', data.direccion);
+                set('departamento_residencia', data.departamento_residencia);
+                set('ciudad_residencia', data.ciudad_residencia);
+                set('codigo_empleado', data.codigo_empleado);
+                set('empresa_id', data.empresa_id);
+                set('sucursal_id', data.sucursal_id);
+                set('departamento_id', data.departamento_id);
+                set('cargo_id', data.cargo_id);
+                set('tipo_contrato_id', data.tipo_contrato_id);
+                set('horario_id', data.horario_id);
+                set('jefe_inmediato_id', data.jefe_inmediato_id);
+                set('fecha_ingreso', soloFecha(data.fecha_ingreso));
+                set('fecha_egreso', soloFecha(data.fecha_egreso));
+                set('salario_base', data.salario_base);
+                set('numero_ips', data.numero_ips);
+                set('profesion', data.profesion);
+                set('estado', data.estado);
 
-    window.verEmpleado = function (id) {
-        fetch(`${rutaBase}/${id}/ver`, { headers: { 'Accept': 'application/json' } })
-            .then(r => r.json())
-            .then(d => {
-                const fmt = v => (v !== null && v !== undefined && v !== '') ? String(v) : '—';
-                const fecha = v => v ? String(v).substring(0, 10) : '—';
-                const fila = (label, val) => `
+                set('fecha_afiliacion_ips', soloFecha(data.fecha_afiliacion_ips));
+                const chkAfiliado = document.getElementById('afiliado_ips');
+                if (chkAfiliado) chkAfiliado.checked = !!data.afiliado_ips;
+                
+                const chkPrueba = document.getElementById('prueba_finalizada');
+                if (chkPrueba) chkPrueba.checked = !!data.prueba_finalizada;
+
+                document.getElementById('empleado_id').value = data.id;
+                document.getElementById('methodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
+                form.action = `${rutaBase}/${data.id}/actualizar`;
+                form.querySelector('[name=modo]').value = 'editar';
+                document.getElementById('modalTitulo').textContent = 'Editar Colaborador';
+
+                const prev = document.getElementById('fotoPreview');
+                if (prev) {
+                    if (data.foto) {
+                        prev.src = `/assets/images/empleados/${data.foto}`;
+                        prev.classList.remove('hidden');
+                    } else prev.classList.add('hidden');
+                }
+                cargarDeptosResidencia();
+                cargarCiudadesResidencia();
+                abrirModal('modalEmpleado');
+            }).catch(err => {
+                console.error(err);
+                F.err('No se pudo cargar el colaborador.');
+            });
+        };
+
+        window.confirmarAnular = function(id, nombre) {
+            document.getElementById('nombreAnular').textContent = nombre;
+            document.getElementById('formAnular').action = `${rutaBase}/${id}/anular`;
+            abrirModal('modalAnular');
+        };
+
+        window.verEmpleado = function(id) {
+            fetch(`${rutaBase}/${id}/ver`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    const fmt = v => (v !== null && v !== undefined && v !== '') ? String(v) : '—';
+                    const fecha = v => v ? String(v).substring(0, 10) : '—';
+                    const fila = (label, val) => `
                     <div class="flex justify-between py-2 border-b border-slate-100 dark:border-zink-500">
                         <span class="text-slate-500 dark:text-zink-300 text-sm">${label}</span>
                         <span class="font-medium text-slate-700 dark:text-zink-100 text-sm text-right">${fmt(val)}</span>
                     </div>`;
-                const foto = d.foto
-                    ? `<img src="/assets/images/empleados/${d.foto}" class="rounded-full mx-auto mb-4" width="100" height="100" style="object-fit:cover;">`
-                    : `<div class="rounded-full mx-auto mb-4 flex items-center justify-center bg-slate-100 dark:bg-zink-700" style="width:100px;height:100px;"><i data-lucide="user" class="w-10 h-10 text-slate-400"></i></div>`;
+                    const foto = d.foto ?
+                        `<img src="/assets/images/empleados/${d.foto}" class="rounded-full mx-auto mb-4" width="100" height="100" style="object-fit:cover;">` :
+                        `<div class="rounded-full mx-auto mb-4 flex items-center justify-center bg-slate-100 dark:bg-zink-700" style="width:100px;height:100px;"><i data-lucide="user" class="w-10 h-10 text-slate-400"></i></div>`;
 
-                document.getElementById('verContenido').innerHTML = `
+                    document.getElementById('verContenido').innerHTML = `
                     ${foto}
                     <h5 class="text-center text-16 mb-4">${fmt(d.apellidos)}, ${fmt(d.nombres)}</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
@@ -683,95 +771,134 @@ window.cerrarModal = (id) => setModal(id, false);
                             ${fila('Estado', d.estado)}
                         </div>
                     </div>`;
-                abrirModal('modalVer');
-            })
-            .catch(err => {
-                console.error(err);
-                F.err('No se pudo cargar el detalle.');
-            });
-    };
+                    abrirModal('modalVer');
+                })
+                .catch(err => {
+                    console.error(err);
+                    F.err('No se pudo cargar el detalle.');
+                });
+        };
 
-    /* ============ Importar ============ */
-    const MAPA_COLUMNAS = {
-        'nombres':'nombres','apellidos':'apellidos',
-        'tipo documento':'tipo_documento','tipo_documento':'tipo_documento','tipo doc':'tipo_documento',
-        'numero documento':'numero_documento','numero_documento':'numero_documento','documento':'numero_documento','ci':'numero_documento','nro documento':'numero_documento',
-        'fecha nacimiento':'fecha_nacimiento','fecha_nacimiento':'fecha_nacimiento',
-        'sexo':'sexo','estado civil':'estado_civil','estado_civil':'estado_civil','nacionalidad':'nacionalidad',
-        'direccion':'direccion','departamento residencia':'departamento_residencia','ciudad residencia':'ciudad_residencia',
-        'telefono':'telefono','correo':'correo','email':'correo',
-        'codigo empleado':'codigo_empleado','codigo':'codigo_empleado',
-        'empresa':'empresa','sucursal':'sucursal','departamento':'departamento','cargo':'cargo',
-        'tipo contrato':'tipo_contrato','horario':'horario',
-        'fecha ingreso':'fecha_ingreso','salario base':'salario_base','salario':'salario_base',
-        'numero ips':'numero_ips','nro ips':'numero_ips','ips':'numero_ips','profesion':'profesion','estado':'estado'
-    };
-    const normTxt = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        /* ============ Importar ============ */
+        const MAPA_COLUMNAS = {
+            'nombres': 'nombres',
+            'apellidos': 'apellidos',
+            'tipo documento': 'tipo_documento',
+            'tipo_documento': 'tipo_documento',
+            'tipo doc': 'tipo_documento',
+            'numero documento': 'numero_documento',
+            'numero_documento': 'numero_documento',
+            'documento': 'numero_documento',
+            'ci': 'numero_documento',
+            'nro documento': 'numero_documento',
+            'fecha nacimiento': 'fecha_nacimiento',
+            'fecha_nacimiento': 'fecha_nacimiento',
+            'sexo': 'sexo',
+            'estado civil': 'estado_civil',
+            'estado_civil': 'estado_civil',
+            'nacionalidad': 'nacionalidad',
+            'direccion': 'direccion',
+            'departamento residencia': 'departamento_residencia',
+            'ciudad residencia': 'ciudad_residencia',
+            'telefono': 'telefono',
+            'correo': 'correo',
+            'email': 'correo',
+            'codigo empleado': 'codigo_empleado',
+            'codigo': 'codigo_empleado',
+            'empresa': 'empresa',
+            'sucursal': 'sucursal',
+            'departamento': 'departamento',
+            'cargo': 'cargo',
+            'tipo contrato': 'tipo_contrato',
+            'horario': 'horario',
+            'fecha ingreso': 'fecha_ingreso',
+            'salario base': 'salario_base',
+            'salario': 'salario_base',
+            'numero ips': 'numero_ips',
+            'nro ips': 'numero_ips',
+            'ips': 'numero_ips',
+            'profesion': 'profesion',
+            'estado': 'estado'
+        };
+        const normTxt = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-    const archivoImp = document.getElementById('archivoImportar');
-    if (archivoImp) {
-        archivoImp.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (ev) {
-                try {
-                    const wb = XLSX.read(ev.target.result, { type: 'array' });
-                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
-                    const filas = json.map(row => {
-                        const o = {};
-                        Object.entries(row).forEach(([k, v]) => {
-                            const clave = MAPA_COLUMNAS[normTxt(k)];
-                            if (clave) o[clave] = (typeof v === 'string') ? v.trim() : v;
+        const archivoImp = document.getElementById('archivoImportar');
+        if (archivoImp) {
+            archivoImp.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const wb = XLSX.read(ev.target.result, {
+                            type: 'array'
                         });
-                        return o;
-                    }).filter(f => f.nombres || f.apellidos || f.numero_documento);
+                        const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+                            defval: ''
+                        });
+                        const filas = json.map(row => {
+                            const o = {};
+                            Object.entries(row).forEach(([k, v]) => {
+                                const clave = MAPA_COLUMNAS[normTxt(k)];
+                                if (clave) o[clave] = (typeof v === 'string') ? v.trim() : v;
+                            });
+                            return o;
+                        }).filter(f => f.nombres || f.apellidos || f.numero_documento);
 
-                    if (!filas.length) { F.err('El archivo no contiene filas válidas.'); return; }
-                    F.info(`Procesando ${filas.length} fila(s)...`);
-
-                    fetch(rutaImportar, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
-                        body: JSON.stringify({ empleados: filas })
-                    }).then(r => r.json()).then(res => {
-                        cerrarModal('modalImportar');
-                        if (res.ok) {
-                            let msg = `Importación exitosa: ${res.importados} colaborador(es)`;
-                            if (res.fallidos) msg += ` — ${res.fallidos} fila(s) con error`;
-                            (res.fallidos ? F.warn : F.ok)(msg);
-                            if (res.errores && res.errores.length) console.warn('Errores:', res.errores);
-                            setTimeout(() => location.reload(), 2500);
-                        } else {
-                            F.err(res.mensaje || 'No se pudo importar.');
+                        if (!filas.length) {
+                            F.err('El archivo no contiene filas válidas.');
+                            return;
                         }
-                    }).catch(() => F.err('Error al comunicar con el servidor.'));
-                } catch (err) {
-                    F.err('No se pudo leer el archivo.');
-                }
-                e.target.value = '';
-            };
-            reader.readAsArrayBuffer(file);
-        });
-    }
+                        F.info(`Procesando ${filas.length} fila(s)...`);
 
-    window.descargarPlantilla = function () {
-        const encabezados = ['nombres','apellidos','tipo_documento','numero_documento','fecha_nacimiento','sexo','estado_civil','nacionalidad','direccion','departamento_residencia','ciudad_residencia','telefono','correo','codigo_empleado','empresa','sucursal','departamento','cargo','tipo_contrato','horario','fecha_ingreso','salario_base','numero_ips','profesion','estado'];
-        const ejemplo = ['JUAN','PEREZ','CI','123456','1980-01-01','M','soltero','paraguaya','Av. España 456','Central','Asunción','0981-123456','juan@correo.com','EMP001','Mi Empresa S.A.','Casa Central','Gerencia','Gerente General','Indefinido','Jornada Completa','2024-01-15','3044000','123456','Ingeniero','activo'];
-        const ws = XLSX.utils.aoa_to_sheet([encabezados, ejemplo]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Colaboradores');
-        XLSX.writeFile(wb, 'plantilla_colaboradores.xlsx');
-    };
+                        fetch(rutaImportar, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                empleados: filas
+                            })
+                        }).then(r => r.json()).then(res => {
+                            cerrarModal('modalImportar');
+                            if (res.ok) {
+                                let msg = `Importación exitosa: ${res.importados} colaborador(es)`;
+                                if (res.fallidos) msg += ` — ${res.fallidos} fila(s) con error`;
+                                (res.fallidos ? F.warn : F.ok)(msg);
+                                if (res.errores && res.errores.length) console.warn('Errores:', res.errores);
+                                setTimeout(() => location.reload(), 2500);
+                            } else {
+                                F.err(res.mensaje || 'No se pudo importar.');
+                            }
+                        }).catch(() => F.err('Error al comunicar con el servidor.'));
+                    } catch (err) {
+                        F.err('No se pudo leer el archivo.');
+                    }
+                    e.target.value = '';
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
 
-    /* Reabrir modal si hubo error de validación */
-    @if($errors->any())
+        window.descargarPlantilla = function() {
+            const encabezados = ['nombres', 'apellidos', 'tipo_documento', 'numero_documento', 'fecha_nacimiento', 'sexo', 'estado_civil', 'nacionalidad', 'direccion', 'departamento_residencia', 'ciudad_residencia', 'telefono', 'correo', 'codigo_empleado', 'empresa', 'sucursal', 'departamento', 'cargo', 'tipo_contrato', 'horario', 'fecha_ingreso', 'salario_base', 'numero_ips', 'profesion', 'estado'];
+            const ejemplo = ['JUAN', 'PEREZ', 'CI', '123456', '1980-01-01', 'M', 'soltero', 'paraguaya', 'Av. España 456', 'Central', 'Asunción', '0981-123456', 'juan@correo.com', 'EMP001', 'Mi Empresa S.A.', 'Casa Central', 'Gerencia', 'Gerente General', 'Indefinido', 'Jornada Completa', '2024-01-15', '3044000', '123456', 'Ingeniero', 'activo'];
+            const ws = XLSX.utils.aoa_to_sheet([encabezados, ejemplo]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Colaboradores');
+            XLSX.writeFile(wb, 'plantilla_colaboradores.xlsx');
+        };
+
+        /* Reabrir modal si hubo error de validación */
+        @if($errors->any())
         cargarDeptosResidencia();
         cargarCiudadesResidencia();
         abrirModal('modalEmpleado');
-    @endif
+        @endif
 
-    if (window.lucide) lucide.createIcons();
-});
+        if (window.lucide) lucide.createIcons();
+    });
 </script>
 @endsection
