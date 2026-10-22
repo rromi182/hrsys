@@ -54,7 +54,10 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
     // -------------------------- main dashboard ----------------------//
     Route::controller(HomeController::class)->group(function () {
         Route::get('/home', 'index')->middleware('auth')->name('home');
+        Route::get('/home/exportar-desglose', 'exportarDesgloseNomina')->middleware('auth')->name('home.exportar_desglose');
     });
+
+
 
     // -------------------------- pages ----------------------//
     Route::controller(AccountController::class)->group(function () {
@@ -119,6 +122,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
         Route::get('/resumen/data', [NominaController::class, 'resumenData'])->name('resumen.data');
         Route::get('/resumen/excel', [NominaController::class, 'exportarExcel'])->name('resumen.excel');
         Route::get('/resumen/csv', [NominaController::class, 'exportarCsv'])->name('resumen.csv');
+        Route::get('/resumen/exportar-desglose', [NominaController::class, 'exportarDesgloseNomina'])->name('exportar_desglose');
         Route::get('/resumen/{empleadoId}/reporte', [NominaController::class, 'reporteIndividual'])->name('resumen.reporte');
 
         // Otras rutas

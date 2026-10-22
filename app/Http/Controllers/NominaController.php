@@ -427,9 +427,13 @@ class NominaController extends Controller
             ->where('estado', 'activo')
             ->get();
 
+        // Obtenemos el % de IPS para el período
+        $parametroIps = \App\Models\ParametroIps::paraPeriodo($empresaId, $anio, $mes);
+        $pctIps = (float) $parametroIps->aporte_empleado;
+
         $resumen = $movimientos
             ->groupBy('empleado_id')
-            ->map(function ($items) {
+            ->map(function ($items) use ($pctIps) {
                 $empleado = $items->first()->empleado;
                 $sueldo        = $items->where('tipo_movimiento', 'sueldo')->sum('monto');
                 $extra         = $items->where('tipo_movimiento', 'extra')->sum('monto');
@@ -437,6 +441,13 @@ class NominaController extends Controller
                 $ausencia      = $items->where('tipo_movimiento', 'ausencia')->sum('monto');
                 $llegadaTardia = $items->where('tipo_movimiento', 'llegada_tardia')->sum('monto');
                 $otros         = $items->where('tipo_movimiento', 'otros')->sum('monto');
+
+                // Cálculo del IPS
+                $bruto = $sueldo + $extra;
+                $ips = 0;
+                if ($empleado && $empleado->afiliado_ips) {
+                    $ips = (int) round($bruto * ($pctIps / 100));
+                }
 
                 return [
                     'empleado'       => $empleado,
@@ -446,7 +457,8 @@ class NominaController extends Controller
                     'ausencia'       => $ausencia,
                     'llegada_tardia' => $llegadaTardia,
                     'otros'          => $otros,
-                    'total_neto'     => ($sueldo + $extra) - ($vale + $ausencia + $llegadaTardia + $otros),
+                    'ips'            => $ips,
+                    'total_neto'     => $bruto - ($vale + $ausencia + $llegadaTardia + $otros) - $ips,
                 ];
             })
             ->sortBy(fn($i) => $i['empleado']->apellidos ?? '')
@@ -469,7 +481,6 @@ class NominaController extends Controller
         $mes       = (int) $request->get('mes', date('m'));
         $empresaId = $request->get('empresa_id', 1);
 
-        // Traer movimientos activos del período
         $movimientos = MovimientoNomina::with(['empleado'])
             ->where('empresa_id', $empresaId)
             ->where('anio', $anio)
@@ -477,16 +488,18 @@ class NominaController extends Controller
             ->where('estado', 'activo')
             ->get();
 
-        // Filtro por empleado (opcional desde el select)
         $empleadoFiltro = $request->get('empleado_id');
         if (!empty($empleadoFiltro)) {
             $movimientos = $movimientos->where('empleado_id', $empleadoFiltro);
         }
 
-        // Agrupar y sumar
+        // Obtenemos el % de IPS
+        $parametroIps = \App\Models\ParametroIps::paraPeriodo($empresaId, $anio, $mes);
+        $pctIps = (float) $parametroIps->aporte_empleado;
+
         $resumen = $movimientos
             ->groupBy('empleado_id')
-            ->map(function ($items) {
+            ->map(function ($items) use ($pctIps) {
                 $empleado = $items->first()->empleado;
 
                 $sueldo        = $items->where('tipo_movimiento', 'sueldo')->sum('monto');
@@ -496,40 +509,39 @@ class NominaController extends Controller
                 $llegadaTardia = $items->where('tipo_movimiento', 'llegada_tardia')->sum('monto');
                 $otros         = $items->where('tipo_movimiento', 'otros')->sum('monto');
 
+                $bruto = $sueldo + $extra;
+                $ips = 0;
+                if ($empleado && $empleado->afiliado_ips) {
+                    $ips = (int) round($bruto * ($pctIps / 100));
+                }
+
                 return [
                     'empleado_id'     => $empleado->id ?? null,
-                    'colaborador'     => $empleado
-                        ? $empleado->nombres . ' ' . $empleado->apellidos
-                        : '-',
+                    'colaborador'     => $empleado ? $empleado->nombres . ' ' . $empleado->apellidos : '-',
                     'ci'              => $empleado->numero_documento ?? '-',
-                    'iniciales'       => $empleado
-                        ? strtoupper(substr($empleado->nombres, 0, 1)) . strtoupper(substr($empleado->apellidos, 0, 1))
-                        : '--',
+                    'iniciales'       => $empleado ? strtoupper(substr($empleado->nombres, 0, 1)) . strtoupper(substr($empleado->apellidos, 0, 1)) : '--',
                     'sueldo'          => $sueldo,
                     'extra'           => $extra,
                     'vale'            => $vale,
                     'ausencia'        => $ausencia,
                     'llegada_tardia'  => $llegadaTardia,
                     'otros'           => $otros,
-                    'total_neto'      => ($sueldo + $extra) - ($vale + $ausencia + $llegadaTardia + $otros),
+                    'ips'             => $ips,
+                    'total_neto'      => $bruto - ($vale + $ausencia + $llegadaTardia + $otros) - $ips,
                 ];
             })
             ->sortBy('colaborador')
             ->values();
 
-        // Búsqueda global (DataTable)
         if ($request->has('search') && !empty($request->search['value'])) {
             $search = strtolower($request->search['value']);
             $resumen = $resumen->filter(function ($item) use ($search) {
-                return str_contains(strtolower($item['colaborador']), $search)
-                    || str_contains(strtolower($item['ci']), $search);
+                return str_contains(strtolower($item['colaborador']), $search) || str_contains(strtolower($item['ci']), $search);
             })->values();
         }
 
-        // Total general (después de filtros)
         $totalGeneral = $resumen->sum('total_neto');
 
-        // Paginación manual
         $start  = (int) $request->get('start', 0);
         $length = (int) $request->get('length', 10);
         $data   = $resumen->slice($start, $length)->values();
@@ -541,5 +553,126 @@ class NominaController extends Controller
             'totalGeneral'    => $totalGeneral,
             'data'            => $data,
         ]);
+    }
+
+    /**
+     * Exportar desglose completo de nómina a Excel para auditoría
+     */
+    public function exportarDesgloseNomina(Request $request)
+    {
+        $anio = $request->get('anio', date('Y'));
+        $mes = $request->get('mes', date('m'));
+        $empresaId = $request->get('empresa_id', 1);
+
+        $movimientos = MovimientoNomina::with('empleado')
+            ->where('empresa_id', $empresaId)
+            ->where('anio', $anio)
+            ->where('mes', $mes)
+            ->where('estado', 'activo')
+            ->get();
+
+        $data = $movimientos->groupBy('empleado_id')->map(function ($items) use ($anio, $mes, $empresaId) {
+            $empleado = $items->first()->empleado;
+
+            $sueldo = $items->where('tipo_movimiento', 'sueldo')->sum('monto');
+            $extra = $items->where('tipo_movimiento', 'extra')->sum('monto');
+            $vale = $items->where('tipo_movimiento', 'vale')->sum('monto');
+            $ausencia = $items->where('tipo_movimiento', 'ausencia')->sum('monto');
+            $llegada_tardia = $items->where('tipo_movimiento', 'llegada_tardia')->sum('monto');
+            $otros = $items->where('tipo_movimiento', 'otros')->sum('monto');
+
+            $bruto = $sueldo + $extra;
+            $descuentos = $vale + $ausencia + $llegada_tardia + $otros;
+
+            $parametroIps = \App\Models\ParametroIps::paraPeriodo($empresaId, $anio, $mes);
+            $pctIps = (float) $parametroIps->aporte_empleado;
+
+            $ips = 0;
+            if ($empleado && $empleado->afiliado_ips) {
+                $ips = round($bruto * ($pctIps / 100));
+            }
+
+            $neto = $bruto - $descuentos - $ips;
+
+            return [
+                'codigo' => $empleado->codigo_empleado ?? '-',
+                'ci' => $empleado->numero_documento ?? '-',
+                'colaborador' => $empleado->apellidos . ', ' . $empleado->nombres,
+                'afiliado_ips' => ($empleado && $empleado->afiliado_ips) ? 'SÍ' : 'NO',
+                'sueldo' => $sueldo,
+                'extra' => $extra,
+                'bruto' => $bruto,
+                'vale' => $vale,
+                'ausencia' => $ausencia,
+                'llegada_tardia' => $llegada_tardia,
+                'otros' => $otros,
+                'total_descuentos' => $descuentos,
+                'ips' => $ips,
+                'neto' => $neto,
+            ];
+        })->sortBy('colaborador')->values();
+
+        $filename = 'Desglose_Movimientos_' . $anio . '_' . str_pad($mes, 2, '0', STR_PAD_LEFT) . '.xls';
+
+        $html = '<html><head><meta charset="UTF-8"></head><body>';
+        $html .= '<h3>Desglose de Movimientos - Período ' . $mes . '/' . $anio . '</h3>';
+        $html .= '<table border="1" style="font-family: Arial; font-size: 11px; text-align: center;">';
+
+        $html .= '<thead><tr style="background-color: #4F46E5; color: white;">';
+        $html .= '<th>Código</th><th>CI</th><th>Colaborador</th><th>IPS?</th>';
+        $html .= '<th>Sueldo</th><th>Extras</th><th>Bruto</th>';
+        $html .= '<th>Vales</th><th>Ausencias</th><th>Lleg. Tardía</th><th>Otros</th><th>Total Desc.</th>';
+        $html .= '<th>Retención IPS</th><th>NETO A PAGAR</th>';
+        $html .= '</tr></thead><tbody>';
+
+        $fila = 2;
+        $totalBruto = 0;
+        $totalIps = 0;
+        $totalNeto = 0;
+
+        foreach ($data as $row) {
+            $totalBruto += $row['bruto'];
+            $totalIps += $row['ips'];
+            $totalNeto += $row['neto'];
+
+            $html .= '<tr>';
+            $html .= '<td>' . $row['codigo'] . '</td>';
+            $html .= '<td>' . $row['ci'] . '</td>';
+            $html .= '<td style="text-align: left;">' . $row['colaborador'] . '</td>';
+            $html .= '<td>' . $row['afiliado_ips'] . '</td>';
+            $html .= '<td>' . number_format($row['sueldo'], 0, ',', '.') . '</td>';
+            $html .= '<td>' . number_format($row['extra'], 0, ',', '.') . '</td>';
+            $html .= '<td style="background-color: #E0E7FF; font-weight: bold;" x:fmla="=E' . $fila . '+F' . $fila . '">' . number_format($row['bruto'], 0, ',', '.') . '</td>';
+            $html .= '<td>' . number_format($row['vale'], 0, ',', '.') . '</td>';
+            $html .= '<td>' . number_format($row['ausencia'], 0, ',', '.') . '</td>';
+            $html .= '<td>' . number_format($row['llegada_tardia'], 0, ',', '.') . '</td>';
+            $html .= '<td>' . number_format($row['otros'], 0, ',', '.') . '</td>';
+            $html .= '<td x:fmla="=SUM(H' . $fila . ':K' . $fila . ')">' . number_format($row['total_descuentos'], 0, ',', '.') . '</td>';
+            $html .= '<td style="color: #DC2626;">' . number_format($row['ips'], 0, ',', '.') . '</td>';
+            $html .= '<td style="background-color: #D1FAE5; font-weight: bold;" x:fmla="=G' . $fila . '-L' . $fila . '-M' . $fila . '">' . number_format($row['neto'], 0, ',', '.') . '</td>';
+            $html .= '</tr>';
+            $fila++;
+        }
+
+        $ultimaFila = $fila - 1;
+
+        $html .= '<tr style="background-color: #F3F4F6; font-weight: bold;">';
+        $html .= '<td colspan="4" style="text-align: right;">TOTALES</td>';
+        $html .= '<td x:fmla="=SUM(E2:E' . $ultimaFila . ')">' . number_format($data->sum('sueldo'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(F2:F' . $ultimaFila . ')">' . number_format($data->sum('extra'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(G2:G' . $ultimaFila . ')">' . number_format($totalBruto, 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(H2:H' . $ultimaFila . ')">' . number_format($data->sum('vale'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(I2:I' . $ultimaFila . ')">' . number_format($data->sum('ausencia'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(J2:J' . $ultimaFila . ')">' . number_format($data->sum('llegada_tardia'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(K2:K' . $ultimaFila . ')">' . number_format($data->sum('otros'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(L2:L' . $ultimaFila . ')">' . number_format($data->sum('total_descuentos'), 0, ',', '.') . '</td>';
+        $html .= '<td x:fmla="=SUM(M2:M' . $ultimaFila . ')">' . number_format($totalIps, 0, ',', '.') . '</td>';
+        $html .= '<td style="background-color: #A7F3D0;" x:fmla="=SUM(N2:N' . $ultimaFila . ')">' . number_format($totalNeto, 0, ',', '.') . '</td>';
+        $html .= '</tr>';
+        $html .= '</tbody></table></body></html>';
+
+        return response($html)
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

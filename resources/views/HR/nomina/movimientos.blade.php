@@ -440,7 +440,7 @@ $(document).ready(function () {
         return new TomSelect(selector, {
             searchField: ['text'],
             maxOptions: 200,
-            allowEmptyOption: true,
+            //allowEmptyOption: true,
             loadThrottle: 150,
             placeholder: 'Buscar colaborador...',
             // Disparar change sobre el <select> original cuando cambia
